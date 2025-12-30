@@ -1,0 +1,185 @@
+<h2>Register</h2>
+
+<form [formGroup] = "registerForm" (ngSubmit) = "onSubmit()">
+
+<div>
+<label>First Name</label>
+<input formControlName = "firstName"/>
+
+  @if(
+    registerForm.controls['firstName'].touched &&
+    registerForm.controls['firstName'].hasError('required')
+    ){
+    <p style = "color:red">
+      First name is required.
+    </p>
+  }
+
+  @if(
+    registerForm.controls['firstName'].touched &&
+    registerForm.controls['firstName'].hasError('minlength')
+    ){
+    <p style = "color:red">
+      First name must be at least 2 characters.
+    </p>
+  }
+</div>
+
+<div>
+<label>Last Name</label>
+<input formControlName = "lastName"/>
+
+  @if(
+    registerForm.controls['lastName'].touched &&
+    registerForm.controls['lastName'].hasError('required')
+    ){
+    <p style = "color:red">
+      Last name is required.
+    </p>
+  }
+
+  @if(
+    registerForm.controls['lastName'].touched &&
+    registerForm.controls['lastName'].hasError('minlength')
+    ){
+    <p style = "color:red">
+      Last name must be at least 2 characters.
+    </p>
+  }
+</div>
+
+<div>
+<label>UserName</label>
+<input formControlName = "username"/>
+
+  @if(
+    registerForm.controls['username'].touched &&
+    registerForm.controls['username'].hasError('required')
+    ){
+    <p style = "color:red">
+      Username is required.
+    </p>
+  }
+
+  @if(
+    registerForm.controls['username'].touched &&
+    registerForm.controls['username'].hasError('minlength')
+    ){
+    <p style = "color:red">
+      Username must be at least 6 characters.
+    </p>
+  }
+</div>
+
+<div>
+<label>Email</label>
+<input formControlName = "email"/>
+
+@if(
+  registerForm.controls['email'].touched &&
+  registerForm.controls['email'].hasError('required')
+  ){
+  <p style = "color:red">
+    Email is required.
+  </p>
+}
+
+@if(
+  registerForm.controls['email'].touched &&
+  registerForm.controls['email'].hasError('email')
+  ){
+  <p style = "color:red">
+    Please enter a valid email address.
+  </p>
+}
+</div>
+
+<div>
+<label>Password</label>
+<input type = "password" formControlName = "password"/>
+
+@if(
+  registerForm.controls['password'].touched &&
+  registerForm.controls['password'].hasError('required')
+  ){
+  <p style = "color:red">
+    Password is required.
+  </p>
+}
+
+@if(
+  registerForm.controls['password'].touched &&
+  registerForm.controls['password'].hasError('minlength')
+  ){
+  <p style = "color: red">
+    Password must be at least 6 characters.
+  </p>
+}
+</div>
+
+<div>
+<label>Confirm Password</label>
+<input type = "password" formControlName = "confirmPassword"/>
+
+@if(
+  registerForm.controls['confirmPassword'].touched &&
+  registerForm.controls['confirmPassword'].hasError('required')
+  ){
+  <p style = "color:red">
+    Please confirm your password.
+  </p>
+}
+
+@if(
+  registerForm.controls['confirmPassword'].touched &&
+  errorMessage === 'Passwords do not match'
+  ){
+  <p style = "color:red">
+    Passwords do not match.
+  </p>
+}
+</div>
+
+<hr>
+
+<div>
+<label>
+  <input type = "checkbox" formControlName = "addPetNow"/>
+  Add pet
+</label>
+</div>
+
+@if(registerForm.value.addPetNow === true){
+<div>
+  <div>
+    <label>Pet Name</label>
+    <input formControlName = "petName"/>
+  </div>
+
+  <div>
+    <label>Pet Type</label>
+    <input formControlName = "petType"/>
+  </div>
+
+  <div>
+    <label>Breed</label>
+    <input formControlName = "petBreed">
+  </div>
+
+  <div>
+    <label>Color</label>
+    <input formControlName = "petColor"/>
+  </div>
+
+</div>
+}
+
+@if(errorMessage){
+  <p style = "color:red">
+      {{errorMessage}}
+  </p>
+}
+
+<button type = "submit">Register</button>
+
+</form>
