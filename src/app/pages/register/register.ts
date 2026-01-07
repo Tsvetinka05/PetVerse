@@ -1,71 +1,58 @@
 import { Component } from '@angular/core';
-import{CommonModule} from '@angular/common';
-import{
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-  Validators
-} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
-  selector:'app-register',
-  standalone:true,
-  imports: [CommonModule,ReactiveFormsModule],
+  selector: 'app-register',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatCardModule,
+  ],
   templateUrl: './register.html',
-  styleUrl: './register.scss'
+  styleUrl: './register.scss',
 })
-export class Register{
+export class Register {
+  errorMessage: string = ' ';
+  registerForm;
 
-  errorMessage:string = ' ';
-  registerForm: FormGroup;
-
-  constructor(){
+  constructor() {
     this.registerForm = new FormGroup({
+      firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
 
-      firstName: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2)
-      ]),
+      lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
 
-      lastName: new FormControl('',[
-        Validators.required,
-        Validators.minLength(2)
-      ]),
+      username: new FormControl('', [Validators.required, Validators.minLength(6)]),
 
-      username: new FormControl('', [
-        Validators.required,
-        Validators.minLength(6)
-      ]),
+      email: new FormControl('', [Validators.required, Validators.email]),
 
-      email: new FormControl('', [
-        Validators.required,
-        Validators.email
-      ]),
+      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
 
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(6)
-      ]),
-
-      confirmPassword: new FormControl('', [
-        Validators.required
-      ]),
+      confirmPassword: new FormControl('', [Validators.required]),
 
       addPetNow: new FormControl(false),
 
       petName: new FormControl(''),
       petType: new FormControl(''),
       petBreed: new FormControl(''),
-      petColor: new FormControl('')
-
+      petColor: new FormControl(''),
     });
   }
 
-  onSubmit():void{
-
+  onSubmit(): void {
     this.errorMessage = '';
 
-    if(this.registerForm.invalid){
+    if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       this.errorMessage = 'Please fix the highlighted fields.';
       return;
@@ -74,12 +61,12 @@ export class Register{
     const password = this.registerForm.value.password;
     const confirmPassword = this.registerForm.value.confirmPassword;
 
-    if(password !== confirmPassword){
+    if (password !== confirmPassword) {
       this.errorMessage = 'Passwords do not match';
       return;
     }
 
-    if(this.registerForm.value.addPetNow===true){
+    if (this.registerForm.value.addPetNow === true) {
       if (
         !this.registerForm.value.petName ||
         !this.registerForm.value.petType ||
@@ -90,6 +77,5 @@ export class Register{
         return;
       }
     }
-
   }
 }

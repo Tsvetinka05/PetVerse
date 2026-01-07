@@ -1,185 +1,163 @@
-<h2>Register</h2>
+<div class="page-bg">
+  <mat-card class="register-card">
+    <mat-card-title class="register-title">Register</mat-card-title>
 
-<form [formGroup] = "registerForm" (ngSubmit) = "onSubmit()">
+    <mat-card-content>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>First Name</mat-label>
 
-<div>
-<label>First Name</label>
-<input formControlName = "firstName"/>
+          <input matInput formControlName="firstName" />
 
-  @if(
-    registerForm.controls['firstName'].touched &&
-    registerForm.controls['firstName'].hasError('required')
-    ){
-    <p style = "color:red">
-      First name is required.
-    </p>
-  }
+          @if (
+            registerForm.controls['firstName'].touched &&
+            registerForm.controls['firstName'].hasError('required')
+          ) {
+            <mat-error>First name is required.</mat-error>
+          }
 
-  @if(
-    registerForm.controls['firstName'].touched &&
-    registerForm.controls['firstName'].hasError('minlength')
-    ){
-    <p style = "color:red">
-      First name must be at least 2 characters.
-    </p>
-  }
+          @if (
+            registerForm.controls['firstName'].touched &&
+            registerForm.controls['firstName'].hasError('minlength')
+          ) {
+            <mat-error>First name must be at least 2 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Last Name</mat-label>
+
+          <input matInput formControlName="lastName" />
+
+          @if (
+            registerForm.controls['lastName'].touched &&
+            registerForm.controls['lastName'].hasError('required')
+          ) {
+            <mat-error>Last name is required.</mat-error>
+          }
+
+          @if (
+            registerForm.controls['lastName'].touched &&
+            registerForm.controls['lastName'].hasError('minlength')
+          ) {
+            <mat-error>Last name must be at least 2 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" />
+
+          @if (
+            registerForm.controls['username'].touched &&
+            registerForm.controls['username'].hasError('required')
+          ) {
+            <mat-error>Username is required.</mat-error>
+          }
+
+          @if (
+            registerForm.controls['username'].touched &&
+            registerForm.controls['username'].hasError('minlength')
+          ) {
+            <mat-error>Username must be at least 6 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" />
+
+          @if (
+            registerForm.controls['email'].touched &&
+            registerForm.controls['email'].hasError('required')
+          ) {
+            <mat-error>Email is required.</mat-error>
+          }
+
+          @if (
+            registerForm.controls['email'].touched &&
+            registerForm.controls['email'].hasError('email')
+          ) {
+            <mat-error>Please enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" />
+
+          @if (
+            registerForm.controls['password'].touched &&
+            registerForm.controls['password'].hasError('required')
+          ) {
+            <mat-error>Password is required.</mat-error>
+          }
+
+          @if (
+            registerForm.controls['password'].touched &&
+            registerForm.controls['password'].hasError('minlength')
+          ) {
+            <mat-error>Password must be at least 6 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput type="password" formControlName="confirmPassword" />
+
+          @if (
+            registerForm.controls['confirmPassword'].touched &&
+            registerForm.controls['confirmPassword'].hasError('required')
+          ) {
+            <mat-error>Please confirm your password.</mat-error>
+          }
+
+          @if (
+            registerForm.controls['confirmPassword'].touched &&
+            errorMessage === 'Passwords do not match'
+          ) {
+            <mat-error>Passwords do not match.</mat-error>
+          }
+        </mat-form-field>
+
+        <hr />
+
+        <mat-checkbox formControlName="addPetNow">Add pet</mat-checkbox>
+
+        @if (registerForm.value.addPetNow === true) {
+          <div style="margin-top: 16px">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Pet Name</mat-label>
+              <input matInput formControlName="petName" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Pet Type</mat-label>
+              <input matInput formControlName="petType" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Breed</mat-label>
+              <input matInput formControlName="petBreed" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Color</mat-label>
+              <input matInput formControlName="petColor" />
+            </mat-form-field>
+          </div>
+        }
+
+        @if (errorMessage) {
+          <p style="color: red; margin-top: 12px">
+            {{ errorMessage }}
+          </p>
+        }
+
+        <div class="button-wrapper">
+          <button mat-raised-button color="primary" type="submit">Register</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </div>
-
-<div>
-<label>Last Name</label>
-<input formControlName = "lastName"/>
-
-  @if(
-    registerForm.controls['lastName'].touched &&
-    registerForm.controls['lastName'].hasError('required')
-    ){
-    <p style = "color:red">
-      Last name is required.
-    </p>
-  }
-
-  @if(
-    registerForm.controls['lastName'].touched &&
-    registerForm.controls['lastName'].hasError('minlength')
-    ){
-    <p style = "color:red">
-      Last name must be at least 2 characters.
-    </p>
-  }
-</div>
-
-<div>
-<label>UserName</label>
-<input formControlName = "username"/>
-
-  @if(
-    registerForm.controls['username'].touched &&
-    registerForm.controls['username'].hasError('required')
-    ){
-    <p style = "color:red">
-      Username is required.
-    </p>
-  }
-
-  @if(
-    registerForm.controls['username'].touched &&
-    registerForm.controls['username'].hasError('minlength')
-    ){
-    <p style = "color:red">
-      Username must be at least 6 characters.
-    </p>
-  }
-</div>
-
-<div>
-<label>Email</label>
-<input formControlName = "email"/>
-
-@if(
-  registerForm.controls['email'].touched &&
-  registerForm.controls['email'].hasError('required')
-  ){
-  <p style = "color:red">
-    Email is required.
-  </p>
-}
-
-@if(
-  registerForm.controls['email'].touched &&
-  registerForm.controls['email'].hasError('email')
-  ){
-  <p style = "color:red">
-    Please enter a valid email address.
-  </p>
-}
-</div>
-
-<div>
-<label>Password</label>
-<input type = "password" formControlName = "password"/>
-
-@if(
-  registerForm.controls['password'].touched &&
-  registerForm.controls['password'].hasError('required')
-  ){
-  <p style = "color:red">
-    Password is required.
-  </p>
-}
-
-@if(
-  registerForm.controls['password'].touched &&
-  registerForm.controls['password'].hasError('minlength')
-  ){
-  <p style = "color: red">
-    Password must be at least 6 characters.
-  </p>
-}
-</div>
-
-<div>
-<label>Confirm Password</label>
-<input type = "password" formControlName = "confirmPassword"/>
-
-@if(
-  registerForm.controls['confirmPassword'].touched &&
-  registerForm.controls['confirmPassword'].hasError('required')
-  ){
-  <p style = "color:red">
-    Please confirm your password.
-  </p>
-}
-
-@if(
-  registerForm.controls['confirmPassword'].touched &&
-  errorMessage === 'Passwords do not match'
-  ){
-  <p style = "color:red">
-    Passwords do not match.
-  </p>
-}
-</div>
-
-<hr>
-
-<div>
-<label>
-  <input type = "checkbox" formControlName = "addPetNow"/>
-  Add pet
-</label>
-</div>
-
-@if(registerForm.value.addPetNow === true){
-<div>
-  <div>
-    <label>Pet Name</label>
-    <input formControlName = "petName"/>
-  </div>
-
-  <div>
-    <label>Pet Type</label>
-    <input formControlName = "petType"/>
-  </div>
-
-  <div>
-    <label>Breed</label>
-    <input formControlName = "petBreed">
-  </div>
-
-  <div>
-    <label>Color</label>
-    <input formControlName = "petColor"/>
-  </div>
-
-</div>
-}
-
-@if(errorMessage){
-  <p style = "color:red">
-      {{errorMessage}}
-  </p>
-}
-
-<button type = "submit">Register</button>
-
-</form>

@@ -1,0 +1,17 @@
+.top-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.active-link {
+  text-decoration: underline;
+}

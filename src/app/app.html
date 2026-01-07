@@ -1,7 +1,11 @@
+<mat-toolbar color="primary" class="top-toolbar">
+  <span class="brand">PetVerse</span>
 
-<nav style="display:flex; gap:12px; padding:12px;">
-  <a routerLink="/register">Register</a>
-  <a routerLink="/login">Login</a>
-</nav>
+  <span class="spacer"></span>
+
+  <a mat-button routerLink="/register" routerLinkActive="active-link"> Register </a>
+
+  <a mat-button routerLink="/login" routerLinkActive="active-link"> Login </a>
+</mat-toolbar>
 
 <router-outlet></router-outlet>

@@ -1,8 +1,85 @@
-div {
-  margin-bottom: 12px;
+//div {
+//  margin-bottom: 12px;
+//}
+//
+//label {
+//  display: block;
+//  margin-bottom: 4px;
+//}
+.register-container {
+  display: flex;
+  justify-content: center; // център по хоризонтала
+  margin-top: 40px;
 }
 
-label {
+form {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin-bottom: 60px;
+}
+
+.full-width {
+  width: 100%;
+}
+mat-checkbox {
+  margin-top: 8px;
+}
+
+button {
+  align-self: flex-start; // бутонът да не е разтегнат
+}
+.register-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+//.button-wrapper {
+//  display: flex;
+//  justify-content: center;
+//  margin-top: 8px;
+//}
+
+.page-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+
+  background: linear-gradient(
+    135deg,
+    #dfe7ff,
+    // по-наситено синьо-лилаво
+    #f7f9ff
+  );
+}
+
+.register-card {
+  width: 100%;
+  max-width: 460px;
+  border-radius: 16px;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+}
+
+.register-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
   display: block;
-  margin-bottom: 4px;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  margin-bottom: 20px;
 }
