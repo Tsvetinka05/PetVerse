@@ -1,0 +1,43 @@
+.page-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+
+  background: linear-gradient(135deg, #dfe7ff, #f7f9ff);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 460px;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+}
+
+.login-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}

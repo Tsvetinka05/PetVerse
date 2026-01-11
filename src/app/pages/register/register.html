@@ -6,7 +6,6 @@
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>First Name</mat-label>
-
           <input matInput formControlName="firstName" />
 
           @if (
@@ -15,18 +14,22 @@
           ) {
             <mat-error>First name is required.</mat-error>
           }
-
           @if (
             registerForm.controls['firstName'].touched &&
             registerForm.controls['firstName'].hasError('minlength')
           ) {
             <mat-error>First name must be at least 2 characters.</mat-error>
           }
+          @if (
+            registerForm.controls['firstName'].touched &&
+            registerForm.controls['firstName'].hasError('maxlength')
+          ) {
+            <mat-error>First name must be at most 256 characters.</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Last Name</mat-label>
-
           <input matInput formControlName="lastName" />
 
           @if (
@@ -35,12 +38,17 @@
           ) {
             <mat-error>Last name is required.</mat-error>
           }
-
           @if (
             registerForm.controls['lastName'].touched &&
             registerForm.controls['lastName'].hasError('minlength')
           ) {
             <mat-error>Last name must be at least 2 characters.</mat-error>
+          }
+          @if (
+            registerForm.controls['lastName'].touched &&
+            registerForm.controls['lastName'].hasError('maxlength')
+          ) {
+            <mat-error>Last name must be at most 256 characters.</mat-error>
           }
         </mat-form-field>
 
@@ -54,13 +62,24 @@
           ) {
             <mat-error>Username is required.</mat-error>
           }
-
           @if (
             registerForm.controls['username'].touched &&
             registerForm.controls['username'].hasError('minlength')
           ) {
-            <mat-error>Username must be at least 6 characters.</mat-error>
+            <mat-error>Username must be at least 2 characters.</mat-error>
           }
+          @if (
+            registerForm.controls['username'].touched &&
+            registerForm.controls['username'].hasError('maxlength')
+          ) {
+            <mat-error>Username must be at most 256 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- NEW: Phone Number (optional) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone Number (optional)</mat-label>
+          <input matInput formControlName="phoneNumber" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -73,7 +92,6 @@
           ) {
             <mat-error>Email is required.</mat-error>
           }
-
           @if (
             registerForm.controls['email'].touched &&
             registerForm.controls['email'].hasError('email')
@@ -92,15 +110,21 @@
           ) {
             <mat-error>Password is required.</mat-error>
           }
-
           @if (
             registerForm.controls['password'].touched &&
             registerForm.controls['password'].hasError('minlength')
           ) {
-            <mat-error>Password must be at least 6 characters.</mat-error>
+            <mat-error>Password must be at least 8 characters.</mat-error>
+          }
+          @if (
+            registerForm.controls['password'].touched &&
+            registerForm.controls['password'].hasError('maxlength')
+          ) {
+            <mat-error>Password must be at most 256 characters.</mat-error>
           }
         </mat-form-field>
 
+        <!-- Frontend-only -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Confirm Password</mat-label>
           <input matInput type="password" formControlName="confirmPassword" />
@@ -114,7 +138,7 @@
 
           @if (
             registerForm.controls['confirmPassword'].touched &&
-            errorMessage === 'Passwords do not match'
+            errorMessage === 'Passwords do not match.'
           ) {
             <mat-error>Passwords do not match.</mat-error>
           }
@@ -129,21 +153,56 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Pet Name</mat-label>
               <input matInput formControlName="petName" />
+
+              @if (
+                registerForm.controls['petName'].touched &&
+                registerForm.controls['petName'].hasError('required')
+              ) {
+                <mat-error>Pet name is required.</mat-error>
+              }
+              @if (
+                registerForm.controls['petName'].touched &&
+                registerForm.controls['petName'].hasError('minlength')
+              ) {
+                <mat-error>Pet name must be at least 2 characters.</mat-error>
+              }
+              @if (
+                registerForm.controls['petName'].touched &&
+                registerForm.controls['petName'].hasError('maxlength')
+              ) {
+                <mat-error>Pet name must be at most 256 characters.</mat-error>
+              }
             </mat-form-field>
 
+            <!-- NEW: Pet Kind -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Pet Type</mat-label>
-              <input matInput formControlName="petType" />
+              <mat-label>Pet Kind</mat-label>
+
+              <mat-select formControlName="petKind">
+                @for (kind of petKinds; track kind) {
+                  <mat-option [value]="kind">{{ kind }}</mat-option>
+                }
+              </mat-select>
+
+              @if (
+                registerForm.controls['petKind'].touched &&
+                registerForm.controls['petKind'].hasError('required')
+              ) {
+                <mat-error>Please select a pet kind.</mat-error>
+              }
             </mat-form-field>
 
+            <!-- NEW: Birth Date -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Breed</mat-label>
-              <input matInput formControlName="petBreed" />
-            </mat-form-field>
+              <mat-label>Pet Birth Date</mat-label>
+              <input matInput type="date" formControlName="petBirthDate" />
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Color</mat-label>
-              <input matInput formControlName="petColor" />
+              @if (
+                registerForm.controls['petBirthDate'].touched &&
+                registerForm.controls['petBirthDate'].hasError('required')
+              ) {
+                <mat-error>Pet birth date is required.</mat-error>
+              }
             </mat-form-field>
           </div>
         }
