@@ -33,8 +33,8 @@ import { MatSelectModule } from '@angular/material/select';
   styleUrl: './register.scss',
 })
 export class Register {
-  errorMessage: string = '';
-  registerForm: FormGroup;
+  errorMessage = '';
+  registerForm;
 
   petKinds: string[] = ['DOG', 'CAT', 'OTHER'];
 
@@ -135,9 +135,10 @@ export class Register {
     petBirthDate.updateValueAndValidity();
   }
 
-  private buildRegisterPayload(): any {
+  private buildRegisterPayload() {
     const v = this.registerForm.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = {
       username: v.username,
       password: v.password,
