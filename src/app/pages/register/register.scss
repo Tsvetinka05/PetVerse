@@ -1,0 +1,66 @@
+/* Page background */
+.page-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+
+  background: linear-gradient(135deg, #dfe7ff, #f7f9ff);
+}
+
+/* Card */
+.register-card {
+  width: 100%;
+  max-width: 460px;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+}
+
+/* Title */
+.register-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Make Material inputs full width */
+.full-width {
+  width: 100%;
+  display: block;
+}
+
+/* Form layout */
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Checkbox spacing */
+mat-checkbox {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* Pet section spacing (optional, if you use h3 or a wrapper) */
+h3 {
+  margin: 8px 0 0 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Center the submit button */
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+
+mat-form-field {
+  margin-bottom: 20px;
+}
