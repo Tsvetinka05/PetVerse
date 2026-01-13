@@ -1,6 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+  ValidationErrors,
+  AbstractControl,
+} from '@angular/forms';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -32,43 +39,46 @@ export class Register {
   petKinds: string[] = ['DOG', 'CAT', 'OTHER'];
 
   constructor() {
-    this.registerForm = new FormGroup({
-      firstName: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(256),
-      ]),
+    this.registerForm = new FormGroup(
+      {
+        firstName: new FormControl('', [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(256),
+        ]),
 
-      lastName: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(256),
-      ]),
+        lastName: new FormControl('', [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(256),
+        ]),
 
-      username: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(256),
-      ]),
+        username: new FormControl('', [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(256),
+        ]),
 
-      phoneNumber: new FormControl(''), // optional
+        phoneNumber: new FormControl(''), // optional
 
-      email: new FormControl('', [Validators.required, Validators.email]),
+        email: new FormControl('', [Validators.required, Validators.email]),
 
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.maxLength(256),
-      ]),
+        password: new FormControl('', [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(256),
+        ]),
 
-      confirmPassword: new FormControl('', [Validators.required]),
+        confirmPassword: new FormControl('', [Validators.required]),
 
-      addPetNow: new FormControl(false),
+        addPetNow: new FormControl(false),
 
-      petName: new FormControl({ value: '', disabled: true }),
-      petKind: new FormControl({ value: '', disabled: true }),
-      petBirthDate: new FormControl({ value: '', disabled: true }),
-    });
+        petName: new FormControl({ value: '', disabled: true }),
+        petKind: new FormControl({ value: '', disabled: true }),
+        petBirthDate: new FormControl({ value: '', disabled: true }),
+      },
+      [this.confirmPassword],
+    );
     this.registerForm.controls['addPetNow'].valueChanges.subscribe((value) => {
       this.applyPetValidators(value === true);
     });
@@ -83,14 +93,6 @@ export class Register {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       this.errorMessage = 'Please fix the highlighted fields.';
-      return;
-    }
-
-    const password = this.registerForm.value.password;
-    const confirmPassword = this.registerForm.value.confirmPassword;
-
-    if (password !== confirmPassword) {
-      this.errorMessage = 'Passwords do not match.';
       return;
     }
 
@@ -154,5 +156,17 @@ export class Register {
     }
 
     return payload;
+  }
+
+  confirmPassword(control: AbstractControl): ValidationErrors | null {
+    const form = control as FormGroup;
+    if (form.controls['password'].value === form.controls['confirmPassword'].value) {
+      return null;
+    } else {
+      form.controls['confirmPassword'].setErrors({
+        passwordDontMatch: true,
+      });
+      return null;
+    }
   }
 }

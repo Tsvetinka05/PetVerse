@@ -129,20 +129,22 @@
           <mat-label>Confirm Password</mat-label>
           <input matInput type="password" formControlName="confirmPassword" />
 
-          @if (
-            registerForm.controls['confirmPassword'].touched &&
-            registerForm.controls['confirmPassword'].hasError('required')
-          ) {
-            <mat-error>Please confirm your password.</mat-error>
-          }
-
-          @if (
-            registerForm.controls['confirmPassword'].touched &&
-            errorMessage === 'Passwords do not match.'
-          ) {
-            <mat-error>Passwords do not match.</mat-error>
+          @if (registerForm.controls['confirmPassword'].touched) {
+            <mat-error>
+              @if (registerForm.controls['confirmPassword'].hasError('required')) {
+                Please confirm your password.
+              } @else if (registerForm.controls['confirmPassword'].hasError('passwordDontMatch')) {
+                Passwords do not match.
+              }
+            </mat-error>
           }
         </mat-form-field>
+        @if (
+          registerForm.hasError('passwordDontMatch') &&
+          registerForm.controls['confirmPassword'].touched
+        ) {
+          Passwords do not match.
+        }
 
         <hr />
 
