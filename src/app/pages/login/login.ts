@@ -9,6 +9,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth';
 
@@ -22,6 +25,7 @@ import { AuthService } from '../../services/auth';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
+    MatSnackBarModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -29,6 +33,8 @@ import { AuthService } from '../../services/auth';
 export class Login {
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   errorMessage = '';
   isSubmitting = false;
@@ -69,13 +75,21 @@ export class Login {
       )
       .subscribe({
         next: (res) => {
-          console.log('LOGIN SUCCESS. TOKEN:', res.token);
-          alert('Login successful!');
-          // тук може да направиш router.navigate(...)
+          this.router.navigate(['/choose-profile']);
+
+          // this.snackBar.open('Login successful!', 'OK', { duration: 2500 });
+          //
+          // this.router.navigateByUrl('/');
         },
         error: (err) => {
+          // backend може да връща error като string
           this.errorMessage =
-            err?.error?.error || err?.message || 'Login failed. Please try again.';
+            err?.error?.error ||
+            err?.error?.message ||
+            err?.message ||
+            'Login failed. Please try again.';
+
+          this.snackBar.open(this.errorMessage, 'OK', { duration: 3500 });
         },
       });
   }
