@@ -62,7 +62,7 @@ export class Login {
     const payload = this.loginForm.getRawValue();
 
     this.isSubmitting = true;
-    this.loginForm.disable(); // prevent double submit
+    this.loginForm.disable();
 
     this.auth
       .login(payload)
@@ -74,12 +74,8 @@ export class Login {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (res) => {
+        next: () => {
           this.router.navigate(['/choose-profile']);
-
-          // this.snackBar.open('Login successful!', 'OK', { duration: 2500 });
-          //
-          // this.router.navigateByUrl('/');
         },
         error: (err) => {
           // backend може да връща error като string
