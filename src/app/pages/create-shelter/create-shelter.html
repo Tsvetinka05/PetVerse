@@ -1,1 +1,40 @@
-<p>create-shelter works!</p>
+<header class="toolbar">
+  <div class="brand">Create Shelter</div>
+  <button class="btn btn-secondary" type="button" (click)="goHome()">Back</button>
+</header>
+
+<main class="container">
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+    <label for="address">Address</label>
+    <input id="address" type="text" formControlName="address" />
+    <small
+      class="field-error"
+      [hidden]="form.controls.address.valid || !form.controls.address.touched"
+    >
+      Address is required.
+    </small>
+
+    <label for="name">Name</label>
+    <input id="name" type="text" formControlName="name" />
+    <small class="field-error" [hidden]="form.controls.name.valid || !form.controls.name.touched">
+      Name is required.
+    </small>
+
+    <label for="iban">IBAN</label>
+    <input id="iban" type="text" formControlName="iban" />
+    <small class="field-error" [hidden]="form.controls.iban.valid || !form.controls.iban.touched">
+      IBAN is required.
+    </small>
+
+    <label for="logo">Logo</label>
+    <input id="logo" type="file" accept="image/*" (change)="onFileChange($event)" />
+
+    <p class="error" [hidden]="!errorMessage">
+      {{ errorMessage }}
+    </p>
+
+    <button class="btn btn-primary" type="submit" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Creating...' : 'Create' }}
+    </button>
+  </form>
+</main>

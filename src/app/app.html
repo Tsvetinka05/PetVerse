@@ -1,11 +1,17 @@
-<mat-toolbar color="primary" class="top-toolbar">
-  <span class="brand">PetVerse</span>
+<header class="topbar">
+  <button class="brand-btn" type="button" (click)="goHome()">PetVerse</button>
+  <nav class="nav">
+    <button class="nav-btn" type="button" (click)="goCreatePost()">Create post</button>
+    <button class="nav-btn" type="button" (click)="goCreateBusiness()">Create business</button>
+    <button class="nav-btn" type="button" (click)="goCreateShelter()">Create shelter</button>
+  </nav>
 
-  <span class="spacer"></span>
+  <div class="auth">
+    <a class="link" routerLink="/login">Login</a>
+    <a class="link" routerLink="/register">Register</a>
+  </div>
+</header>
 
-  <a mat-button routerLink="/register" routerLinkActive="active-link"> Register </a>
-
-  <a mat-button routerLink="/login" routerLinkActive="active-link"> Login </a>
-</mat-toolbar>
-
-<router-outlet></router-outlet>
+<main class="main">
+  <router-outlet></router-outlet>
+</main>

@@ -75,7 +75,7 @@ export class Login {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/choose-profile']);
+          this.router.navigate(['/home']);
         },
         error: (err) => {
           // backend може да връща error като string

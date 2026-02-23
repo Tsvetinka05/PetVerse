@@ -1,9 +1,14 @@
 import { Routes } from '@angular/router';
+
 import { Register } from './pages/register/register';
 import { Login } from './pages/login/login';
-import { ChooseProfile } from './pages/choose-profile/choose-profile';
+import { Home } from './pages/home/home';
+
 import { CreateBusiness } from './pages/create-business/create-business';
 import { CreateShelter } from './pages/create-shelter/create-shelter';
+
+import { BusinessPage } from './pages/business/business';
+import { ShelterPage } from './pages/shelter/shelter';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -11,18 +16,13 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'login', component: Login },
 
-  { path: 'choose-profile', component: ChooseProfile },
+  { path: 'home', component: Home },
+
   { path: 'create-business', component: CreateBusiness },
   { path: 'create-shelter', component: CreateShelter },
 
-  {
-    path: 'business/:id',
-    loadComponent: () => import('./pages/business/business').then((m) => m.Business),
-  },
-  {
-    path: 'shelter/:id',
-    loadComponent: () => import('./pages/shelter/shelter').then((m) => m.Shelter),
-  },
+  { path: 'business/:id', component: BusinessPage },
+  { path: 'shelter/:id', component: ShelterPage },
 
   { path: '**', redirectTo: 'login' },
 ];

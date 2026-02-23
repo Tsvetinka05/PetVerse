@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "$schema": "https://json.schemastore.org/angular-cli",
   "version": 1,
   "cli": {
     "packageManager": "npm",
@@ -68,7 +68,7 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "src/proxy.conf.json"
+            "proxyConfig": "proxy.conf.json"
           }
         },
         "test": {

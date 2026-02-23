@@ -1,17 +1,29 @@
-import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { httpResource } from '@angular/common/http';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule],
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
-  // TODO to be removed, this is just an example
-  verifyUser = httpResource(() => '/api/accounts/verify-username?userName=test');
+  private readonly router = inject(Router);
+
+  goHome(): void {
+    this.router.navigate(['/home']);
+  }
+
+  goCreatePost(): void {
+    alert('Create post will be available soon');
+  }
+
+  goCreateBusiness(): void {
+    this.router.navigate(['/create-business']);
+  }
+
+  goCreateShelter(): void {
+    this.router.navigate(['/create-shelter']);
+  }
 }

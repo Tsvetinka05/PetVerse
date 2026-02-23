@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
@@ -27,20 +27,18 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
+
   private readonly TOKEN_KEY = 'petverse_token';
 
-  constructor(private http: HttpClient) {}
-
+  // 🔥 Вече НЕ използваме API_BASE_URL
   private readonly REGISTER_URL = '/api/accounts/register';
   private readonly LOGIN_URL = '/api/accounts/login';
 
   register(payload: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(this.REGISTER_URL, payload).pipe(
       tap((res) => {
-        const token = res?.token;
-        if (token) {
-          this.setToken(token);
-        }
+        if (res?.token) this.setToken(res.token);
       }),
     );
   }
