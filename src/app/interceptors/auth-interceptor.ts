@@ -1,8 +1,12 @@
-import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { AuthService } from '../services/auth';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.url.endsWith('/api/accounts/login') || req.url.endsWith('/api/accounts/register')) {
+    return next(req);
+  }
+
   const auth = inject(AuthService);
   const token = auth.getToken();
 
@@ -10,7 +14,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(
     req.clone({
-      setHeaders: { Authorization: 'Bearer ' + token },
+      setHeaders: { Authorization: `Bearer ${token}` },
     }),
   );
 };

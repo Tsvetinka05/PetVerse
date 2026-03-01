@@ -1,13 +1,24 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
+
+import { ActiveProfileService } from './active-profile.service';
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  jwtToken: string; // по Swagger
+}
 
 export interface RegisterRequest {
   username: string;
   password: string;
   firstName: string;
   lastName: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   email: string;
   pet?: {
     name: string;
@@ -16,52 +27,81 @@ export interface RegisterRequest {
   };
 }
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  token: string;
+export interface RegisterResponse {
+  jwtToken: string; // по Swagger
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
-
   private readonly TOKEN_KEY = 'petverse_token';
+  private readonly http = inject(HttpClient);
+  private readonly profiles = inject(ActiveProfileService);
 
-  // 🔥 Вече НЕ използваме API_BASE_URL
-  private readonly REGISTER_URL = '/api/accounts/register';
-  private readonly LOGIN_URL = '/api/accounts/login';
+  private readonly baseUrl = '';
 
-  register(payload: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(this.REGISTER_URL, payload).pipe(
-      tap((res) => {
-        if (res?.token) this.setToken(res.token);
-      }),
-    );
-  }
-
-  login(payload: LoginRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(this.LOGIN_URL, payload)
-      .pipe(tap((res) => this.setToken(res.token)));
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
   setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  logout(): void {
+  clearToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  logout(): void {
+    this.clearToken();
+    this.profiles.clearAll?.();
+  }
+
+  private parseJwtToken(text: string): string {
+    const trimmed = (text ?? '').trim();
+
+    // ако изглежда като JSON
+    if (trimmed.startsWith('{')) {
+      try {
+        const obj = JSON.parse(trimmed);
+        const token = obj?.jwtToken;
+        if (typeof token === 'string' && token.length > 0) return token;
+      } catch {
+        // ignore -> fallback
+      }
+    }
+
+    return trimmed;
+  }
+
+  login(payload: LoginRequest): Observable<LoginResponse> {
+    return this.http
+      .post(`${this.baseUrl}/api/accounts/login`, payload, { responseType: 'text' })
+      .pipe(
+        map((text) => {
+          const jwtToken = this.parseJwtToken(text);
+          return { jwtToken } as LoginResponse;
+        }),
+        tap((res) => {
+          if (res.jwtToken) this.setToken(res.jwtToken);
+        }),
+      );
+  }
+
+  register(payload: RegisterRequest): Observable<RegisterResponse> {
+    return this.http
+      .post(`${this.baseUrl}/api/accounts/register`, payload, { responseType: 'text' })
+      .pipe(
+        map((text) => {
+          const jwtToken = this.parseJwtToken(text);
+          return { jwtToken } as RegisterResponse;
+        }),
+        tap((res) => {
+          if (res.jwtToken) this.setToken(res.jwtToken);
+        }),
+      );
   }
 }

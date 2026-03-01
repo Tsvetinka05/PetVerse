@@ -12,7 +12,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { Router } from '@angular/router';
-
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -78,7 +77,6 @@ export class Login {
           this.router.navigate(['/home']);
         },
         error: (err) => {
-          // backend може да връща error като string
           this.errorMessage =
             err?.error?.error ||
             err?.error?.message ||

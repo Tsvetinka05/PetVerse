@@ -8,6 +8,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
@@ -20,7 +21,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 
 import { AuthService } from '../../services/auth';
-import type { RegisterRequest } from '../../services/auth';
+import type { RegisterRequest, RegisterResponse } from '../../services/auth';
 
 @Component({
   selector: 'app-register',
@@ -41,6 +42,7 @@ import type { RegisterRequest } from '../../services/auth';
 export class Register {
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   errorMessage = '';
   isSubmitting = false;
@@ -94,13 +96,13 @@ export class Register {
   constructor() {
     this.registerForm.controls.addPetNow.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => this.applyPetValidators(value === true));
+      .subscribe((value) => this.applyPetValidators(value));
   }
 
   onSubmit(): void {
     this.errorMessage = '';
 
-    this.applyPetValidators(this.registerForm.controls.addPetNow.value === true);
+    this.applyPetValidators(this.registerForm.controls.addPetNow.value);
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -119,20 +121,25 @@ export class Register {
         finalize(() => {
           this.isSubmitting = false;
           this.registerForm.enable();
-          this.applyPetValidators(this.registerForm.controls.addPetNow.value === true);
+          this.applyPetValidators(this.registerForm.controls.addPetNow.value);
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (res) => {
-          // ако backend връща token
-          const token = res?.token;
-
-          if (token) {
-            this.auth.setToken(token);
+        next: (res: RegisterResponse) => {
+          if (res?.jwtToken) {
+            this.auth.setToken(res.jwtToken);
           }
 
           alert('Registration successful!');
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          this.errorMessage =
+            err?.error?.message ||
+            err?.error?.error ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            (err?.status ? `Failed (${err.status})` : 'Registration failed.');
         },
       });
   }
@@ -181,7 +188,7 @@ export class Register {
       email: v.email,
     };
 
-    if (v.addPetNow === true) {
+    if (v.addPetNow) {
       payload.pet = {
         name: v.petName,
         kind: v.petKind,

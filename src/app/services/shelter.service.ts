@@ -1,34 +1,55 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
-export interface ShelterDto {
-  id: number | string;
+export interface CreateShelterRequest {
   address: string;
   name: string;
   iban: string;
+  logo: File;
+}
+
+export interface CreateShelterResponse {
+  id: number | string;
+}
+
+export interface ShelterProfile {
+  id: number | string;
+  address: string;
+  logoPath?: string;
+  name: string;
+  iban: string;
+  logoSrc?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ShelterService {
   private readonly http = inject(HttpClient);
 
-  createShelter(data: {
-    address: string;
-    name: string;
-    iban: string;
-    logo: File;
-  }): Observable<ShelterDto> {
-    const formData = new FormData();
-    formData.append('address', data.address);
-    formData.append('name', data.name);
-    formData.append('iban', data.iban);
-    formData.append('logo', data.logo);
+  private readonly CREATE_URL = '/api/profiles/shelter';
+  private readonly GET_BY_ID_URL = '/api/profiles/shelter';
 
-    return this.http.post<ShelterDto>('/api/shelter', formData);
+  private readonly ASSET_BASE = '';
+
+  createShelter(payload: CreateShelterRequest): Observable<CreateShelterResponse> {
+    const form = new FormData();
+    form.append('address', payload.address);
+    form.append('name', payload.name);
+    form.append('iban', payload.iban);
+    form.append('logo', payload.logo);
+    return this.http.post<CreateShelterResponse>(this.CREATE_URL, form);
   }
 
-  getShelterById(id: string | number): Observable<ShelterDto> {
-    return this.http.get<ShelterDto>(`/api/shelter/${id}`);
+  getShelterById(id: number | string): Observable<ShelterProfile> {
+    return this.http.get<ShelterProfile>(`${this.GET_BY_ID_URL}/${id}`).pipe(
+      map((p) => ({
+        ...p,
+        logoSrc: p.logoPath
+          ? p.logoPath.startsWith('http')
+            ? p.logoPath
+            : `${this.ASSET_BASE}${p.logoPath}`
+          : undefined,
+      })),
+    );
   }
 }

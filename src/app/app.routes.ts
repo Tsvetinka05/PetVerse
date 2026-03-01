@@ -10,8 +10,14 @@ import { CreateShelter } from './pages/create-shelter/create-shelter';
 import { BusinessPage } from './pages/business/business';
 import { ShelterPage } from './pages/shelter/shelter';
 
+import { Me } from './pages/me/me';
+
+import { CreateBusinessPost } from './pages/create-business-post/create-business-post';
+import { CreateLostAnimalPost } from './pages/create-lost-animal-post/create-lost-animal-post';
+import { CreateShelterPost } from './pages/create-shelter-post/create-shelter-post';
+
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
 
   { path: 'register', component: Register },
   { path: 'login', component: Login },
@@ -21,8 +27,15 @@ export const routes: Routes = [
   { path: 'create-business', component: CreateBusiness },
   { path: 'create-shelter', component: CreateShelter },
 
+  { path: 'me', component: Me },
+
   { path: 'business/:id', component: BusinessPage },
   { path: 'shelter/:id', component: ShelterPage },
 
-  { path: '**', redirectTo: 'login' },
+  // create post pages
+  { path: 'create-business-post', component: CreateBusinessPost },
+  { path: 'create-lost-animal', component: CreateLostAnimalPost },
+  { path: 'create-shelter-post', component: CreateShelterPost },
+
+  { path: '**', redirectTo: 'home' },
 ];

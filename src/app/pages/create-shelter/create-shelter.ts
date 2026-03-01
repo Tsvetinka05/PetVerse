@@ -1,10 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
-import { ShelterService } from '../../services/shelter.service';
+import { finalize } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { ActiveProfileService } from '../../services/active-profile.service';
+
+interface CreateShelterResponse {
+  id?: number;
+  shelterId?: number;
+}
 
 @Component({
   selector: 'app-create-shelter',
@@ -14,17 +22,29 @@ import { ShelterService } from '../../services/shelter.service';
   styleUrl: './create-shelter.scss',
 })
 export class CreateShelter {
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly shelterService = inject(ShelterService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly profiles = inject(ActiveProfileService);
 
-  logoFile: File | null = null;
   isSubmitting = false;
   errorMessage = '';
 
+  private logoFile: File | null = null;
+
   form = new FormGroup({
-    address: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    iban: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    address: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(256)],
+    }),
+    name: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(256)],
+    }),
+    iban: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(10), Validators.maxLength(64)],
+    }),
   });
 
   goHome(): void {
@@ -41,34 +61,55 @@ export class CreateShelter {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.errorMessage = 'Please fill all required fields.';
-      return;
-    }
-
-    if (!this.logoFile) {
-      this.errorMessage = 'Please choose a logo file.';
       return;
     }
 
     const v = this.form.getRawValue();
 
-    this.isSubmitting = true;
+    const fd = new FormData();
+    fd.append('address', v.address.trim());
+    fd.append('name', v.name.trim());
+    fd.append('iban', v.iban.trim());
 
-    this.shelterService
-      .createShelter({
-        address: v.address,
-        name: v.name,
-        iban: v.iban,
-        logo: this.logoFile,
-      })
-      .pipe(finalize(() => (this.isSubmitting = false)))
+    if (this.logoFile) {
+      fd.append('logo', this.logoFile);
+    }
+
+    this.isSubmitting = true;
+    this.form.disable();
+
+    this.http
+      .post<CreateShelterResponse>('/api/profiles/shelter', fd)
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+          this.form.enable();
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
-        next: (created) => this.router.navigate(['/shelter', created.id]),
+        next: (res) => {
+          const idRaw = res?.id ?? res?.shelterId ?? null;
+          const id = idRaw != null ? Number(idRaw) : null;
+
+          if (id != null && Number.isFinite(id)) {
+            localStorage.setItem('petverse_last_shelter_id', String(id));
+            this.profiles.setShelterAsActive(id, true);
+
+            this.router.navigate(['/shelter', id]);
+            return;
+          }
+
+          this.router.navigate(['/me']);
+        },
         error: (err) => {
-          this.errorMessage =
+          const status = err?.status;
+          const msg =
             err?.error?.message ||
             err?.error?.error ||
-            (err.status ? `Failed (${err.status})` : 'Failed to create shelter.');
+            (typeof err?.error === 'string' ? err.error : '') ||
+            'Failed to create shelter.';
+          this.errorMessage = status ? `Failed (${status}) ${msg}` : msg;
         },
       });
   }
