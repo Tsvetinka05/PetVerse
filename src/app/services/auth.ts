@@ -10,7 +10,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  jwtToken: string; // по Swagger
+  jwtToken: string;
 }
 
 export interface RegisterRequest {
@@ -28,7 +28,7 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  jwtToken: string; // по Swagger
+  jwtToken: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -57,20 +57,19 @@ export class AuthService {
 
   logout(): void {
     this.clearToken();
-    this.profiles.clearAll?.();
+    this.profiles.clearAll();
   }
 
   private parseJwtToken(text: string): string {
     const trimmed = (text ?? '').trim();
 
-    // ако изглежда като JSON
     if (trimmed.startsWith('{')) {
       try {
         const obj = JSON.parse(trimmed);
         const token = obj?.jwtToken;
         if (typeof token === 'string' && token.length > 0) return token;
-      } catch {
-        // ignore -> fallback
+      } catch (err) {
+        console.error(err);
       }
     }
 
@@ -81,10 +80,7 @@ export class AuthService {
     return this.http
       .post(`${this.baseUrl}/api/accounts/login`, payload, { responseType: 'text' })
       .pipe(
-        map((text) => {
-          const jwtToken = this.parseJwtToken(text);
-          return { jwtToken } as LoginResponse;
-        }),
+        map((text) => ({ jwtToken: this.parseJwtToken(text) }) as LoginResponse),
         tap((res) => {
           if (res.jwtToken) this.setToken(res.jwtToken);
         }),
@@ -95,10 +91,7 @@ export class AuthService {
     return this.http
       .post(`${this.baseUrl}/api/accounts/register`, payload, { responseType: 'text' })
       .pipe(
-        map((text) => {
-          const jwtToken = this.parseJwtToken(text);
-          return { jwtToken } as RegisterResponse;
-        }),
+        map((text) => ({ jwtToken: this.parseJwtToken(text) }) as RegisterResponse),
         tap((res) => {
           if (res.jwtToken) this.setToken(res.jwtToken);
         }),

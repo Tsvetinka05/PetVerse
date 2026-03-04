@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 import { ActiveProfileService } from './services/active-profile.service';
+import { AuthService } from './services/auth';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ import { ActiveProfileService } from './services/active-profile.service';
 export class App {
   private readonly router = inject(Router);
   readonly profiles = inject(ActiveProfileService);
+  readonly auth = inject(AuthService);
 
   private get cleanUrl(): string {
     const url = this.router.url || '';
@@ -43,6 +45,11 @@ export class App {
 
   goRegister(): void {
     this.router.navigate(['/register']);
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
   goCreatePost(): void {

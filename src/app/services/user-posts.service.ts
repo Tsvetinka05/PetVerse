@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export type PetType = 'dog' | 'cat';
+export type PetType = 'dog' | 'cat' | 'other';
 
 export interface CreateLostAnimalPostRequest {
   photo: File;
@@ -13,27 +13,39 @@ export interface CreateLostAnimalPostRequest {
 
 export interface LostAnimalPostResponse {
   id: number;
-  photo: string;
+  photoPath: string;
   title: string;
-  type: PetType;
+  type: PetType | string;
   body: string;
-  userId: number;
+  userId: string;
+  published: string;
   status: string;
+  mediaPaths?: string[] | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class UserPostsService {
   private readonly http = inject(HttpClient);
 
-  private readonly CREATE_LOST_URL = '/api/posts/user/lost_animal';
+  private readonly API_BASE = 'http://localhost:5224';
+
+  private readonly CREATE_LOST_URL = `${this.API_BASE}/api/posts/user/lost_animal`;
+  private readonly GET_POSTS_URL = `${this.API_BASE}/api/posts`;
+
+  getPosts(pageNumber: number): Observable<LostAnimalPostResponse[]> {
+    const params = new HttpParams().set('PageNumber', String(pageNumber));
+    return this.http.get<LostAnimalPostResponse[]>(this.GET_POSTS_URL, { params });
+  }
 
   createLostAnimalPost(payload: CreateLostAnimalPostRequest): Observable<LostAnimalPostResponse> {
-    const form = new FormData();
-    form.append('photo', payload.photo);
-    form.append('title', payload.title);
-    form.append('body', payload.body);
-    form.append('type', payload.type);
+    const params = new HttpParams()
+      .set('Type', payload.type)
+      .set('Title', payload.title)
+      .set('Body', payload.body);
 
-    return this.http.post<LostAnimalPostResponse>(this.CREATE_LOST_URL, form);
+    const form = new FormData();
+    form.append('Photo', payload.photo);
+
+    return this.http.post<LostAnimalPostResponse>(this.CREATE_LOST_URL, form, { params });
   }
 }

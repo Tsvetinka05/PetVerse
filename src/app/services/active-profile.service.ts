@@ -69,12 +69,10 @@ export class ActiveProfileService {
     this.writeActive(def);
   }
 
-  // backward-compat
   switchToDefault(profile: ActiveProfile): void {
     this.switchTo(profile, true);
   }
 
-  // ---- persistence ----
   private readActive(): ActiveProfile {
     const raw = localStorage.getItem(this.STORAGE_KEY);
     if (!raw) return { type: 'user', id: null };
