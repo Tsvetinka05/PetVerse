@@ -1,0 +1,49 @@
+<section class="home">
+  <h1>Home</h1>
+  <p class="subtitle">Latest posts</p>
+
+  <div class="feed">
+    @if (loading && feed.length === 0) {
+      <div class="empty">
+        <div class="empty-title">Loading…</div>
+        <div class="empty-text">Fetching posts.</div>
+      </div>
+    }
+
+    @if (error) {
+      <div class="empty">
+        <div class="empty-title">Error</div>
+        <div class="empty-text">{{ error }}</div>
+      </div>
+    }
+
+    @if (!loading && !error && feed.length === 0) {
+      <div class="empty">
+        <div class="empty-title">No posts yet</div>
+        <div class="empty-text">When posts are added, they will show up here.</div>
+      </div>
+    }
+
+    @for (item of feed; track item.id) {
+      <article class="card">
+        <h3 class="title">{{ item.title }}</h3>
+
+        <p class="body">{{ item.body }}</p>
+
+        @if (!item.imgBroken && item.imgUrl) {
+          <img class="img" [src]="item.imgUrl" [alt]="item.title" (error)="onImgError(item)" />
+        }
+
+        <div class="meta">Published: {{ item.published }}</div>
+      </article>
+    }
+
+    @if (!error && feed.length > 0) {
+      <div class="more">
+        <button type="button" (click)="loadMore()" [disabled]="loading || !hasMore">
+          {{ loading ? 'Loading…' : hasMore ? 'Load more' : 'No more posts' }}
+        </button>
+      </div>
+    }
+  </div>
+</section>

@@ -1,0 +1,29 @@
+<div class="page">
+  <h1>Create marketing post</h1>
+
+  <p class="error" [hidden]="!errorMessage">{{ errorMessage }}</p>
+
+  <form class="form" (submit)="submit()">
+    <label class="field">
+      <span>Title</span>
+      <input type="text" [formControl]="form.controls.title" />
+    </label>
+
+    <label class="field">
+      <span>Body</span>
+      <textarea rows="5" [formControl]="form.controls.body"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Media (photos/videos)</span>
+      <input type="file" multiple (change)="onFilesSelected($event)" />
+    </label>
+
+    <div class="actions">
+      <button type="button" (click)="goHome()">Home</button>
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Publishing...' : 'Publish' }}
+      </button>
+    </div>
+  </form>
+</div>

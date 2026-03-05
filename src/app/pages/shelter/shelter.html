@@ -1,0 +1,23 @@
+<div class="profile-page">
+  <h1>Shelter profile</h1>
+
+  <p [hidden]="!isLoading">Loading...</p>
+
+  <p class="error" [hidden]="isLoading || !errorMessage">
+    {{ errorMessage }}
+  </p>
+
+  <div class="card" [hidden]="isLoading || errorMessage || !shelter">
+    <img class="logo" [src]="shelter?.logoSrc" alt="Shelter logo" [hidden]="!shelter?.logoSrc" />
+
+    <h2>{{ shelter?.name }}</h2>
+
+    <p><strong>Address:</strong> {{ shelter?.address }}</p>
+    <p><strong>IBAN:</strong> {{ shelter?.iban }}</p>
+
+    <div class="actions">
+      <button type="button" (click)="goHome()">Home</button>
+      <button type="button" (click)="switchToUser()">Switch to user profile</button>
+    </div>
+  </div>
+</div>

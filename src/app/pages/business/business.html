@@ -1,0 +1,28 @@
+<div class="profile-page">
+  <h1>Business profile</h1>
+
+  <p [hidden]="!isLoading">Loading...</p>
+
+  <p class="error" [hidden]="isLoading || !errorMessage">
+    {{ errorMessage }}
+  </p>
+
+  <div class="card" [hidden]="isLoading || errorMessage || !business">
+    <img class="logo" [src]="business?.logoSrc" alt="Business logo" [hidden]="!business?.logoSrc" />
+
+    <h2>{{ business?.name }}</h2>
+
+    <p><strong>Address:</strong> {{ business?.address }}</p>
+
+    <p [hidden]="!business?.identificationNumber">
+      <strong>Identification number:</strong> {{ business?.identificationNumber }}
+    </p>
+
+    <p class="desc">{{ business?.description }}</p>
+
+    <div class="actions">
+      <button type="button" (click)="goHome()">Home</button>
+      <button type="button" (click)="switchToUser()">Switch to user profile</button>
+    </div>
+  </div>
+</div>

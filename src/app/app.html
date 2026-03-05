@@ -1,11 +1,53 @@
-<mat-toolbar color="primary" class="top-toolbar">
-  <span class="brand">PetVerse</span>
+<header class="topbar">
+  <button class="brand-btn" type="button" (click)="goHome()">PetVerse</button>
 
-  <span class="spacer"></span>
+  <nav class="nav" [hidden]="!isAuthPage">
+    <button class="nav-btn" type="button" (click)="goRegister()" [hidden]="!isLoginPage">
+      Register
+    </button>
 
-  <a mat-button routerLink="/register" routerLinkActive="active-link"> Register </a>
+    <button class="nav-btn" type="button" (click)="goLogin()" [hidden]="!isRegisterPage">
+      Login
+    </button>
+  </nav>
 
-  <a mat-button routerLink="/login" routerLinkActive="active-link"> Login </a>
-</mat-toolbar>
+  <nav class="nav" [hidden]="isAuthPage">
+    <button class="nav-btn" type="button" (click)="goHome()">Home</button>
+    <button class="nav-btn" type="button" (click)="goCreatePost()">Create post</button>
 
-<router-outlet></router-outlet>
+    <button
+      class="nav-btn"
+      type="button"
+      (click)="goCreateBusiness()"
+      [hidden]="profiles.active().type !== 'user'"
+    >
+      Create business
+    </button>
+
+    <button
+      class="nav-btn"
+      type="button"
+      (click)="goCreateShelter()"
+      [hidden]="profiles.active().type !== 'user'"
+    >
+      Create shelter
+    </button>
+
+    <button class="nav-btn" type="button" (click)="goMyProfile()">My profile</button>
+
+    <button
+      class="nav-btn"
+      type="button"
+      (click)="goBackProfile()"
+      [hidden]="!profiles.canGoBack()"
+    >
+      Back to previous profile
+    </button>
+
+    <button type="button" (click)="logout()">Logout</button>
+  </nav>
+</header>
+
+<main class="main">
+  <router-outlet></router-outlet>
+</main>
