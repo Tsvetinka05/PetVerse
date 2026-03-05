@@ -26,11 +26,10 @@ export interface LostAnimalPostResponse {
 @Injectable({ providedIn: 'root' })
 export class UserPostsService {
   private readonly http = inject(HttpClient);
+  private readonly API_BASE = '/api';
 
-  private readonly API_BASE = 'http://localhost:5224';
-
-  private readonly CREATE_LOST_URL = `${this.API_BASE}/api/posts/user/lost_animal`;
-  private readonly GET_POSTS_URL = `${this.API_BASE}/api/posts`;
+  private readonly CREATE_LOST_URL = `${this.API_BASE}/posts/user/lost_animal`;
+  private readonly GET_POSTS_URL = `${this.API_BASE}/posts`;
 
   getPosts(pageNumber: number): Observable<LostAnimalPostResponse[]> {
     const params = new HttpParams().set('PageNumber', String(pageNumber));

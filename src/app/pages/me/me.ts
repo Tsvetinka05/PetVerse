@@ -5,6 +5,10 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 
+import { ActiveProfileService } from '../../services/active-profile.service';
+import { AuthService } from '../../services/auth';
+import { BusinessService } from '../../services/business.service';
+
 @Component({
   selector: 'app-me',
   standalone: true,
@@ -14,37 +18,58 @@ import { MatCardModule } from '@angular/material/card';
 })
 export class Me implements OnInit {
   private readonly router = inject(Router);
+  private readonly profiles = inject(ActiveProfileService);
+  private readonly auth = inject(AuthService);
+  private readonly business = inject(BusinessService);
 
   username = '';
   businessId: number | null = null;
   shelterId: number | null = null;
 
   ngOnInit(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.username = 'tsveti';
 
     this.businessId = this.readNumber('petverse_last_business_id');
     this.shelterId = this.readNumber('petverse_last_shelter_id');
+
+    this.profiles.setUserAsActive(false);
+
+    this.validateBusinessId();
+  }
+
+  private validateBusinessId(): void {
+    if (!this.businessId) return;
+
+    const id = this.businessId;
+
+    this.business.getBusinessById(id).subscribe((profile) => {
+      if (!profile) {
+        localStorage.removeItem('petverse_last_business_id');
+        this.businessId = null;
+      }
+    });
   }
 
   goToBusiness(): void {
     if (!this.businessId) return;
 
-    localStorage.setItem(
-      'petverse_active_profile',
-      JSON.stringify({ type: 'business', id: this.businessId }),
-    );
-
+    this.profiles.setBusinessAsActive(this.businessId, true);
     this.router.navigate(['/business', this.businessId]);
+  }
+
+  goToCreateBusiness(): void {
+    this.router.navigate(['/create-business']);
   }
 
   goToShelter(): void {
     if (!this.shelterId) return;
 
-    localStorage.setItem(
-      'petverse_active_profile',
-      JSON.stringify({ type: 'shelter', id: this.shelterId }),
-    );
-
+    this.profiles.setShelterAsActive(this.shelterId, true);
     this.router.navigate(['/shelter', this.shelterId]);
   }
 

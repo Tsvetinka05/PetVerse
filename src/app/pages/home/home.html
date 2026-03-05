@@ -28,14 +28,10 @@
       <article class="card">
         <h3 class="title">{{ item.title }}</h3>
 
-        <p class="body">
-          {{ item.body }}
-        </p>
+        <p class="body">{{ item.body }}</p>
 
-        @if (item.photoUrl) {
-          <img class="img" [src]="item.photoUrl" [alt]="item.title" />
-        } @else if (item.mediaUrl) {
-          <img class="img" [src]="item.mediaUrl" [alt]="item.title" />
+        @if (!item.imgBroken && item.imgUrl) {
+          <img class="img" [src]="item.imgUrl" [alt]="item.title" (error)="onImgError(item)" />
         }
 
         <div class="meta">Published: {{ item.published }}</div>

@@ -36,6 +36,10 @@ export class App {
   }
 
   goHome(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.router.navigate(['/home']);
   }
 
@@ -52,31 +56,33 @@ export class App {
     this.router.navigate(['/login']);
   }
 
-  goCreatePost(): void {
+  goMyProfile(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const a = this.profiles.active();
 
-    if (a.type === 'business') {
-      this.router.navigate(['/create-business-post']);
+    if (a.type === 'business' && a.id != null) {
+      this.router.navigate(['/business', a.id]);
       return;
     }
 
-    if (a.type === 'shelter') {
-      this.router.navigate(['/create-shelter-post']);
+    if (a.type === 'shelter' && a.id != null) {
+      this.router.navigate(['/shelter', a.id]);
       return;
     }
 
-    this.router.navigate(['/create-lost-animal']);
-  }
-
-  goCreateBusiness(): void {
-    this.router.navigate(['/create-business']);
-  }
-
-  goCreateShelter(): void {
-    this.router.navigate(['/create-shelter']);
+    this.router.navigate(['/me']);
   }
 
   goBackProfile(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const prev = this.profiles.goBack();
 
     if (prev.type === 'business' && prev.id != null) {
@@ -92,19 +98,40 @@ export class App {
     this.router.navigate(['/me']);
   }
 
-  goMyProfile(): void {
+  goCreatePost(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const a = this.profiles.active();
 
-    if (a.type === 'business' && a.id != null) {
-      this.router.navigate(['/business', a.id]);
+    if (a.type === 'business') {
+      this.router.navigate(['/create-business-post']);
       return;
     }
 
-    if (a.type === 'shelter' && a.id != null) {
-      this.router.navigate(['/shelter', a.id]);
+    if (a.type === 'shelter') {
+      this.router.navigate(['/create-shelter-post']);
       return;
     }
 
-    this.router.navigate(['/me']);
+    this.router.navigate(['/create-lost-animal-post']);
+  }
+
+  goCreateBusiness(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.router.navigate(['/create-business']);
+  }
+
+  goCreateShelter(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.router.navigate(['/create-shelter']);
   }
 }

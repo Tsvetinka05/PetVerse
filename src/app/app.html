@@ -1,7 +1,6 @@
 <header class="topbar">
   <button class="brand-btn" type="button" (click)="goHome()">PetVerse</button>
 
-  <!-- Само за login/register -->
   <nav class="nav" [hidden]="!isAuthPage">
     <button class="nav-btn" type="button" (click)="goRegister()" [hidden]="!isLoginPage">
       Register
@@ -12,7 +11,6 @@
     </button>
   </nav>
 
-  <!-- За всички други страници -->
   <nav class="nav" [hidden]="isAuthPage">
     <button class="nav-btn" type="button" (click)="goHome()">Home</button>
     <button class="nav-btn" type="button" (click)="goCreatePost()">Create post</button>
@@ -46,7 +44,7 @@
       Back to previous profile
     </button>
 
-    <button (click)="logout()">Logout</button>
+    <button type="button" (click)="logout()">Logout</button>
   </nav>
 </header>
 

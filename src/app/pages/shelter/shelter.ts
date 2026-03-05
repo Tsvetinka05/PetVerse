@@ -1,10 +1,11 @@
-import { Component, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { ShelterService, ShelterProfile } from '../../services/shelter.service';
 import { ActiveProfileService } from '../../services/active-profile.service';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-shelter-page',
@@ -13,11 +14,12 @@ import { ActiveProfileService } from '../../services/active-profile.service';
   templateUrl: './shelter.html',
   styleUrl: './shelter.scss',
 })
-export class ShelterPage {
+export class ShelterPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly shelterService = inject(ShelterService);
   private readonly profiles = inject(ActiveProfileService);
+  private readonly auth = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   shelter: ShelterProfile | null = null;
@@ -25,6 +27,11 @@ export class ShelterPage {
   errorMessage = '';
 
   ngOnInit(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
 
@@ -35,6 +42,16 @@ export class ShelterPage {
         this.cdr.detectChanges();
         return;
       }
+
+      const numId = Number(id);
+      if (!Number.isFinite(numId)) {
+        this.errorMessage = 'Invalid shelter id.';
+        this.cdr.detectChanges();
+        return;
+      }
+
+      this.profiles.setShelterAsActive(numId, false);
+      localStorage.setItem('petverse_last_shelter_id', String(numId));
 
       this.load(id);
     });
@@ -79,7 +96,7 @@ export class ShelterPage {
   }
 
   switchToUser(): void {
-    this.profiles.switchTo({ type: 'user', id: null }, true);
+    this.profiles.setUserAsActive(true);
     this.router.navigate(['/me']);
   }
 }
