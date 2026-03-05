@@ -1,0 +1,53 @@
+<header class="toolbar">
+  <div class="brand">Create Business</div>
+  <button class="btn btn-secondary" type="button" (click)="goHome()">Back</button>
+</header>
+
+<main class="container">
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Address -->
+    <label for="address">Address</label>
+    <input id="address" type="text" formControlName="address" />
+    <small
+      class="field-error"
+      [hidden]="form.controls.address.valid || !form.controls.address.touched"
+    >
+      Address is required.
+    </small>
+
+    <!-- Name -->
+    <label for="name">Name</label>
+    <input id="name" type="text" formControlName="name" />
+    <small class="field-error" [hidden]="form.controls.name.valid || !form.controls.name.touched">
+      Name is required.
+    </small>
+
+    <!-- Description -->
+    <label for="description">Description</label>
+    <textarea id="description" rows="4" formControlName="description"> </textarea>
+    <small
+      class="field-error"
+      [hidden]="form.controls.description.valid || !form.controls.description.touched"
+    >
+      Description is required.
+    </small>
+
+    <!-- Identification Number -->
+    <label for="identificationNumber"> Identification Number (optional) </label>
+    <input id="identificationNumber" type="text" formControlName="identificationNumber" />
+
+    <!-- Logo -->
+    <label for="logo">Logo</label>
+    <input id="logo" type="file" accept="image/*" (change)="onFileChange($event)" />
+
+    <!-- Backend error -->
+    <p class="error" [hidden]="!errorMessage">
+      {{ errorMessage }}
+    </p>
+
+    <!-- Submit -->
+    <button class="btn btn-primary" type="submit" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Creating...' : 'Create' }}
+    </button>
+  </form>
+</main>

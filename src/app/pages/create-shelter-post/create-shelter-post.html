@@ -1,0 +1,36 @@
+<div class="page">
+  <h1>Create adoption post</h1>
+
+  <p class="error" [hidden]="!errorMessage">{{ errorMessage }}</p>
+
+  <form class="form" (submit)="submit()">
+    <label class="field">
+      <span>Type</span>
+      <select [formControl]="form.controls.type">
+        <option value="dog">dog</option>
+        <option value="cat">cat</option>
+        <option value="other">other</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Title</span>
+      <input type="text" [formControl]="form.controls.title" />
+    </label>
+
+    <label class="field">
+      <span>Body</span>
+      <textarea rows="5" [formControl]="form.controls.body"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Photo</span>
+      <input type="file" accept="image/*" (change)="onFileChange($event)" />
+    </label>
+
+    <div class="actions">
+      <button type="button" (click)="goHome()">Home</button>
+      <button type="submit" [disabled]="isSubmitting">Publish</button>
+    </div>
+  </form>
+</div>

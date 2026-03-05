@@ -1,0 +1,19 @@
+<h2>My profile</h2>
+
+<p><strong>Username:</strong> {{ username }}</p>
+
+<h3>Switch to:</h3>
+
+<div style="display: flex; gap: 12px; margin-top: 12px">
+  <button mat-raised-button color="primary" (click)="goToBusiness()" [disabled]="!businessId">
+    Go to Business Profile
+  </button>
+
+  <button mat-raised-button color="primary" (click)="goToShelter()" [disabled]="!shelterId">
+    Go to Shelter Profile
+  </button>
+</div>
+
+<p style="margin-top: 16px">Business ID: {{ businessId }}</p>
+
+<p>Shelter ID: {{ shelterId }}</p>
