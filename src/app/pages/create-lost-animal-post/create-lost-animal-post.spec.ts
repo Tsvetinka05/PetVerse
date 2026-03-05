@@ -8,9 +8,8 @@ describe('CreateLostAnimalPost', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateLostAnimalPost]
-    })
-    .compileComponents();
+      imports: [CreateLostAnimalPost],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CreateLostAnimalPost);
     component = fixture.componentInstance;
