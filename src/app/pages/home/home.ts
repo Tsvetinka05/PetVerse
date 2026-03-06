@@ -1,8 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
-import { UserPostsService, LostAnimalPostResponse } from '../../services/user-posts.service';
-import { PostMediaService } from '../../services/post-media.service';
+
+import { FeedService, FeedPostDto } from '../../services/feed.service';
 
 interface FeedCardVm {
   id: number;
@@ -11,6 +10,7 @@ interface FeedCardVm {
   published: string;
   imgUrl: string | null;
   imgBroken: boolean;
+  rawPhotoPath: string | null;
 }
 
 @Component({
@@ -20,20 +20,16 @@ interface FeedCardVm {
   styleUrl: './home.scss',
 })
 export class Home implements OnInit, OnDestroy {
-  private readonly posts = inject(UserPostsService);
-  private readonly media = inject(PostMediaService);
+  private readonly feedService = inject(FeedService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly sanitizer = inject(DomSanitizer);
 
   loading = false;
   error = '';
   pageNumber = 1;
   hasMore = true;
+
   feed: FeedCardVm[] = [];
 
-  feedHtml: SafeHtml = this.sanitizer.bypassSecurityTrustHtml('');
-
-  private readonly cards: FeedCardVm[] = [];
   private readonly subs = new Subscription();
 
   ngOnInit(): void {
@@ -47,63 +43,76 @@ export class Home implements OnInit, OnDestroy {
   loadFirstPage(): void {
     this.pageNumber = 1;
     this.hasMore = true;
-    this.cards.length = 0;
-    this.render();
+    this.feed = [];
     this.loadPage(this.pageNumber, true);
-  }
-  onImgError(item: FeedCardVm): void {
-    item.imgBroken = true;
-    item.imgUrl = null;
-    this.cdr.detectChanges();
   }
 
   loadMore(): void {
-    if (this.loading || !this.hasMore) return;
+    if (this.loading || !this.hasMore) {
+      return;
+    }
+
     this.pageNumber += 1;
     this.loadPage(this.pageNumber, false);
+  }
+
+  onImgError(item: FeedCardVm): void {
+    item.imgBroken = true;
+    this.cdr.detectChanges();
   }
 
   private loadPage(page: number, replace: boolean): void {
     this.loading = true;
     this.error = '';
-    this.render();
     this.cdr.detectChanges();
 
-    const s = this.posts.getPosts(page).subscribe({
+    const sub = this.feedService.getFeed(page).subscribe({
       next: (items) => {
         const mapped = (items ?? []).map((p) => this.mapToVm(p));
 
         if (replace) {
-          this.cards.length = 0;
-          this.cards.push(...mapped);
+          this.feed = mapped;
         } else {
-          this.cards.push(...mapped);
+          this.feed = [...this.feed, ...mapped];
         }
 
-        this.cards.sort(
-          (a, b) => new Date(b.published).getTime() - new Date(a.published).getTime(),
-        );
+        console.log('items from api:', items);
+        console.log('mapped:', mapped);
+        console.log('feed after set:', this.feed);
+
+        this.feed.sort((a, b) => {
+          return new Date(b.published).getTime() - new Date(a.published).getTime();
+        });
 
         this.hasMore = !!items && items.length > 0;
         this.loading = false;
-
-        this.render();
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Feed load failed:', err);
         this.error = 'Failed to load posts.';
         this.loading = false;
-        this.render();
         this.cdr.detectChanges();
       },
     });
 
-    this.subs.add(s);
+    this.subs.add(sub);
   }
 
-  private mapToVm(p: LostAnimalPostResponse): FeedCardVm {
-    const imgUrl = this.media.buildAbsolutePhotoUrl(p.photoPath);
+  private mapToVm(p: FeedPostDto): FeedCardVm {
+    const rawPhotoPath =
+      p.photoUrl ||
+      p.photoPath ||
+      p.mediaUrl ||
+      (p.mediaPaths && p.mediaPaths.length > 0 ? p.mediaPaths[0] : null) ||
+      null;
+
+    const imgUrl = rawPhotoPath;
+
+    console.log('feed dto =', p);
+    console.log('rawPhotoPath =', rawPhotoPath);
+    console.log('imgUrl =', imgUrl);
+
     return {
       id: p.id,
       title: p.title ?? '',
@@ -111,83 +120,7 @@ export class Home implements OnInit, OnDestroy {
       published: p.published ?? '',
       imgUrl,
       imgBroken: false,
+      rawPhotoPath,
     };
-  }
-
-  private escapeHtml(s: string): string {
-    return String(s)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
-
-  private render(): void {
-    if (this.loading && this.cards.length === 0) {
-      this.feedHtml = this.sanitizer.bypassSecurityTrustHtml(`
-        <div class="empty">
-          <div class="empty-title">Loading…</div>
-          <div class="empty-text">Fetching posts.</div>
-        </div>
-      `);
-      return;
-    }
-
-    if (this.error) {
-      this.feedHtml = this.sanitizer.bypassSecurityTrustHtml(`
-        <div class="empty">
-          <div class="empty-title">Error</div>
-          <div class="empty-text">${this.escapeHtml(this.error)}</div>
-        </div>
-      `);
-      return;
-    }
-
-    if (!this.loading && !this.error && this.cards.length === 0) {
-      this.feedHtml = this.sanitizer.bypassSecurityTrustHtml(`
-        <div class="empty">
-          <div class="empty-title">No posts yet</div>
-          <div class="empty-text">When posts are added, they will show up here.</div>
-        </div>
-      `);
-      return;
-    }
-
-    let html = '';
-    for (const c of this.cards) {
-      const title: string = this.escapeHtml(c.title);
-      const body: string = this.escapeHtml(c.body);
-      const published: string = this.escapeHtml(c.published);
-
-      const img: string = c.imgUrl
-        ? `<img class="img" src="${this.escapeHtml(c.imgUrl)}" alt="${title}" />`
-        : '';
-
-      html += `
-    <article class="card">
-      <h3 class="title">${title}</h3>
-      <p class="body">${body}</p>
-      ${img}
-      <div class="meta">Published: ${published}</div>
-    </article>
-  `;
-    }
-
-    html += `
-      <div class="more">
-        <button type="button" id="loadMoreBtn" ${this.loading || !this.hasMore ? 'disabled' : ''}>
-          ${this.loading ? 'Loading…' : this.hasMore ? 'Load more' : 'No more posts'}
-        </button>
-      </div>
-    `;
-
-    this.feedHtml = this.sanitizer.bypassSecurityTrustHtml(html);
-
-    queueMicrotask(() => {
-      const btn = document.getElementById('loadMoreBtn');
-      if (!btn) return;
-      btn.onclick = () => this.loadMore();
-    });
   }
 }

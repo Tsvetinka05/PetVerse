@@ -4,5 +4,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/Images": {
+    "target": "http://localhost:5224",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }

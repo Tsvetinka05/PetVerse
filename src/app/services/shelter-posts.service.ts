@@ -12,7 +12,7 @@ export interface CreateShelterPostRequest {
   shelterId: number;
 }
 
-export interface CreateShelterPostResponse {
+export interface ShelterPostResponse {
   photo: string;
   title: string;
   body: string;
@@ -29,15 +29,21 @@ export class ShelterPostsService {
   private readonly http = inject(HttpClient);
 
   private readonly CREATE_URL = '/api/posts/shelter/animal_adoption';
+  private readonly GET_BY_SHELTER_URL = '/api/posts/shelter';
 
-  createShelterPost(payload: CreateShelterPostRequest): Observable<CreateShelterPostResponse> {
+  createShelterPost(payload: CreateShelterPostRequest): Observable<ShelterPostResponse> {
     const form = new FormData();
+
     form.append('Photo', payload.photo);
     form.append('Title', payload.title);
     form.append('Body', payload.body);
     form.append('Type', payload.type);
     form.append('ShelterId', String(payload.shelterId));
 
-    return this.http.post<CreateShelterPostResponse>(this.CREATE_URL, form);
+    return this.http.post<ShelterPostResponse>(this.CREATE_URL, form);
+  }
+
+  getPostsByShelterId(shelterId: number): Observable<ShelterPostResponse[]> {
+    return this.http.get<ShelterPostResponse[]>(`${this.GET_BY_SHELTER_URL}/${shelterId}`);
   }
 }

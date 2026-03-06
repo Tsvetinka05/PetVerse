@@ -1,7 +1,4 @@
-<section class="home">
-  <h1>Home</h1>
-  <p class="subtitle">Latest posts</p>
-
+<div class="home">
   <div class="feed">
     @if (loading && feed.length === 0) {
       <div class="empty">
@@ -30,8 +27,15 @@
 
         <p class="body">{{ item.body }}</p>
 
+        <div class="meta">rawPhotoPath: {{ item.rawPhotoPath }}</div>
+        <div class="meta">imgUrl: {{ item.imgUrl }}</div>
+
         @if (!item.imgBroken && item.imgUrl) {
           <img class="img" [src]="item.imgUrl" [alt]="item.title" (error)="onImgError(item)" />
+        }
+
+        @if (item.imgBroken) {
+          <div class="meta">Image failed to load: {{ item.imgUrl }}</div>
         }
 
         <div class="meta">Published: {{ item.published }}</div>
@@ -46,4 +50,4 @@
       </div>
     }
   </div>
-</section>
+</div>
