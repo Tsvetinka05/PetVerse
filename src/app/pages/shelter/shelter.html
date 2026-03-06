@@ -1,23 +1,53 @@
 <div class="profile-page">
   <h1>Shelter profile</h1>
 
-  <p [hidden]="!isLoading">Loading...</p>
+  @if (isLoading) {
+    <p>Loading...</p>
+  }
 
-  <p class="error" [hidden]="isLoading || !errorMessage">
-    {{ errorMessage }}
-  </p>
+  @if (!isLoading && errorMessage) {
+    <p class="error">
+      {{ errorMessage }}
+    </p>
+  }
 
-  <div class="card" [hidden]="isLoading || errorMessage || !shelter">
-    <img class="logo" [src]="shelter?.logoSrc" alt="Shelter logo" [hidden]="!shelter?.logoSrc" />
+  @if (!isLoading && !errorMessage && shelter) {
+    <div class="card">
+      <img class="logo" [src]="shelter.logoSrc" alt="Shelter logo" [hidden]="!shelter.logoSrc" />
 
-    <h2>{{ shelter?.name }}</h2>
+      <h2>{{ shelter.name }}</h2>
 
-    <p><strong>Address:</strong> {{ shelter?.address }}</p>
-    <p><strong>IBAN:</strong> {{ shelter?.iban }}</p>
+      <p><strong>Address:</strong> {{ shelter.address }}</p>
+      <p><strong>IBAN:</strong> {{ shelter.iban }}</p>
 
-    <div class="actions">
-      <button type="button" (click)="goHome()">Home</button>
-      <button type="button" (click)="switchToUser()">Switch to user profile</button>
+      <div class="actions">
+        <button type="button" (click)="goHome()">Home</button>
+        <button type="button" (click)="switchToUser()">Switch to user profile</button>
+      </div>
     </div>
-  </div>
+  }
+
+  <section class="posts-section">
+    <h2>Posts</h2>
+
+    @if (posts.length === 0) {
+      <p class="empty-posts">No posts yet.</p>
+    }
+
+    @for (p of posts; track p.published + p.title + p.body) {
+      <div class="post-card">
+        <h3>{{ p.title }}</h3>
+
+        <p class="post-body">{{ p.body }}</p>
+
+        @if (p.photoUrl) {
+          <img [src]="p.photoUrl" class="post-img" alt="Shelter post photo" />
+        }
+
+        <p><strong>Type:</strong> {{ p.type }}</p>
+        <p><strong>Status:</strong> {{ p.status }}</p>
+        <p class="meta">Published: {{ p.published }}</p>
+      </div>
+    }
+  </section>
 </div>
