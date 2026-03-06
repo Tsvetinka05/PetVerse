@@ -21,7 +21,9 @@ export interface BusinessPostResponse {
 @Injectable({ providedIn: 'root' })
 export class BusinessPostsService {
   private readonly http = inject(HttpClient);
-  private readonly BASE_URL = '/api/posts/business/business_post';
+
+  private readonly CREATE_URL = '/api/posts/business/business_post';
+  private readonly GET_BY_BUSINESS_URL = '/api/posts/business';
 
   createBusinessPost(payload: CreateBusinessPostRequest): Observable<BusinessPostResponse> {
     const params = new HttpParams()
@@ -30,10 +32,15 @@ export class BusinessPostsService {
       .set('Body', payload.body);
 
     const form = new FormData();
+
     for (const f of payload.media) {
       form.append('Media', f);
     }
 
-    return this.http.post<BusinessPostResponse>(this.BASE_URL, form, { params });
+    return this.http.post<BusinessPostResponse>(this.CREATE_URL, form, { params });
+  }
+
+  getPostsByBusinessId(businessId: number): Observable<BusinessPostResponse[]> {
+    return this.http.get<BusinessPostResponse[]>(`${this.GET_BY_BUSINESS_URL}/${businessId}`);
   }
 }
