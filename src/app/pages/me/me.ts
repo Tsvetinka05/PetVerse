@@ -32,8 +32,8 @@ export class Me implements OnInit {
 
     this.username = this.auth.getUsername() ?? 'Unknown user';
 
-    this.businessId = this.readNumber('petverse_last_business_id');
-    this.shelterId = this.readNumber('petverse_last_shelter_id');
+    this.businessId = this.readScopedProfileId('business');
+    this.shelterId = this.readScopedProfileId('shelter');
 
     this.profiles.setUserAsActive(false);
   }
@@ -70,6 +70,21 @@ export class Me implements OnInit {
 
     this.profiles.setShelterAsActive(this.shelterId, true);
     this.router.navigate(['/shelter', this.shelterId]);
+  }
+
+  private readScopedProfileId(type: 'business' | 'shelter'): number | null {
+    const userId = this.auth.getCurrentUserId();
+
+    if (!userId) {
+      return null;
+    }
+
+    const scopedKey = this.getProfileStorageKey(type, userId);
+    return this.readNumber(scopedKey);
+  }
+
+  private getProfileStorageKey(type: 'business' | 'shelter', userId: string): string {
+    return `petverse_${type}_id_${userId}`;
   }
 
   private readNumber(key: string): number | null {

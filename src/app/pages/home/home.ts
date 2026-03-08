@@ -6,6 +6,17 @@ import { FeedService, FeedPostDto } from '../../services/feed.service';
 import { UserPostsService } from '../../services/user-posts.service';
 import { AuthService } from '../../services/auth';
 import { AdoptionRequestsService } from '../../services/adoption-requests.service';
+import { CommentsService, CommentDto, CommentType } from '../../services/comments.service';
+
+interface FeedCommentVm {
+  commentId: number;
+  postId: number;
+  comment: string;
+  time: string;
+  userId: string;
+  displayUser: string;
+  type: string;
+}
 
 interface FeedCardVm {
   id: number;
@@ -21,6 +32,14 @@ interface FeedCardVm {
   requestOpen: boolean;
   requestMessage: string;
   requestSent: boolean;
+
+  commentsOpen: boolean;
+  commentsLoading: boolean;
+  commentsLoaded: boolean;
+  commentsError: string;
+  comments: FeedCommentVm[];
+  newCommentText: string;
+  isSubmittingComment: boolean;
 }
 
 @Component({
@@ -36,12 +55,14 @@ export class Home implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly adoptionService = inject(AdoptionRequestsService);
+  private readonly commentsService = inject(CommentsService);
 
   loading = false;
   error = '';
   pageNumber = 1;
   hasMore = true;
   currentUserId: string | null = null;
+  currentUsername: string | null = null;
 
   feed: FeedCardVm[] = [];
 
@@ -49,6 +70,7 @@ export class Home implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentUserId = this.auth.getCurrentUserId();
+    this.currentUsername = this.auth.getUsername();
     this.loadFirstPage();
   }
 
@@ -167,6 +189,105 @@ export class Home implements OnInit, OnDestroy {
     );
   }
 
+  canComment(item: FeedCardVm): boolean {
+    return !!this.currentUserId && !item.isSubmittingComment;
+  }
+
+  getCommentType(item: FeedCardVm): CommentType {
+    if (this.isLostAnimalPost(item)) {
+      return 'lost';
+    }
+
+    if (this.isShelterAdoptionPost(item)) {
+      return 'adoption';
+    }
+
+    return 'service';
+  }
+
+  toggleComments(item: FeedCardVm): void {
+    item.commentsOpen = !item.commentsOpen;
+
+    if (item.commentsOpen && !item.commentsLoaded && !item.commentsLoading) {
+      this.loadComments(item);
+      return;
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  loadComments(item: FeedCardVm): void {
+    item.commentsLoading = true;
+    item.commentsError = '';
+    this.cdr.detectChanges();
+
+    const sub = this.commentsService.getComments(item.id, this.getCommentType(item)).subscribe({
+      next: (comments) => {
+        item.comments = (comments ?? []).map((c) => this.mapComment(c));
+        item.commentsLoaded = true;
+        item.commentsLoading = false;
+        item.commentsError = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Comments load failed:', err);
+        item.commentsLoading = false;
+        item.commentsLoaded = false;
+        item.commentsError =
+          err?.error?.message ||
+          err?.error?.error ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          'Failed to load comments.';
+        this.cdr.detectChanges();
+      },
+    });
+
+    this.subs.add(sub);
+  }
+
+  addComment(item: FeedCardVm): void {
+    const text = item.newCommentText.trim();
+
+    if (!text) {
+      item.commentsError = 'Please enter a comment.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    item.isSubmittingComment = true;
+    item.commentsError = '';
+    this.cdr.detectChanges();
+
+    const sub = this.commentsService
+      .createComment({
+        postId: item.id,
+        comment: text,
+        type: this.getCommentType(item),
+      })
+      .subscribe({
+        next: () => {
+          item.newCommentText = '';
+          item.commentsOpen = true;
+          item.commentsLoaded = false;
+          item.isSubmittingComment = false;
+          item.commentsError = '';
+          this.loadComments(item);
+        },
+        error: (err) => {
+          console.error('Create comment failed:', err);
+          item.isSubmittingComment = false;
+          item.commentsError =
+            err?.error?.message ||
+            err?.error?.error ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            `Failed to add comment (${err?.status ?? 'unknown error'}).`;
+          this.cdr.detectChanges();
+        },
+      });
+
+    this.subs.add(sub);
+  }
+
   markAsFound(item: FeedCardVm): void {
     if (!this.canMarkAsFound(item)) {
       return;
@@ -253,6 +374,29 @@ export class Home implements OnInit, OnDestroy {
       requestOpen: false,
       requestMessage: '',
       requestSent: false,
+
+      commentsOpen: false,
+      commentsLoading: false,
+      commentsLoaded: false,
+      commentsError: '',
+      comments: [],
+      newCommentText: '',
+      isSubmittingComment: false,
+    };
+  }
+
+  private mapComment(c: CommentDto): FeedCommentVm {
+    const userId = c.userId ?? '';
+    const isCurrentUser = !!this.currentUserId && userId === this.currentUserId;
+
+    return {
+      commentId: c.commentId,
+      postId: c.postId,
+      comment: c.comment ?? '',
+      time: c.time ?? '',
+      userId,
+      displayUser: isCurrentUser ? (this.currentUsername ?? userId) : userId,
+      type: c.type ?? '',
     };
   }
 }

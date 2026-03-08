@@ -8,7 +8,7 @@
     }
 
     @if (error) {
-      <div class="empty">
+      <div class="empty error-box">
         <div class="empty-title">Error</div>
         <div class="empty-text">{{ error }}</div>
       </div>
@@ -39,12 +39,12 @@
 
         @if (isLostAnimalPost(item)) {
           @if (isFound(item)) {
-            <div class="meta">The animal was found.</div>
+            <div class="status-badge success">The animal was found.</div>
           } @else {
             <div class="meta">Status: {{ item.status || 'missing' }}</div>
 
             @if (canMarkAsFound(item)) {
-              <button class="nav-btn" type="button" (click)="markAsFound(item)">
+              <button class="action-btn" type="button" (click)="markAsFound(item)">
                 Mark as found
               </button>
             }
@@ -55,32 +55,91 @@
           <div class="meta">Status: {{ item.status || 'available' }}</div>
 
           @if (isAdopted(item)) {
-            <div class="meta">This animal has already been adopted.</div>
+            <div class="status-badge adopted">This animal has already been adopted.</div>
           }
 
           @if (canSendAdoptionRequest(item)) {
-            <button type="button" (click)="openRequestBox(item)">
+            <button class="action-btn" type="button" (click)="openRequestBox(item)">
               {{ item.requestOpen ? 'Cancel' : 'Send adoption request' }}
             </button>
           }
 
           @if (item.requestOpen) {
-            <textarea
-              [(ngModel)]="item.requestMessage"
-              placeholder="Why do you want to adopt this animal?"
-            ></textarea>
+            <div class="request-box">
+              <textarea
+                class="text-input"
+                [(ngModel)]="item.requestMessage"
+                placeholder="Why do you want to adopt this animal?"
+              ></textarea>
 
-            <button type="button" (click)="sendAdoptionRequest(item)">Submit request</button>
+              <button class="action-btn" type="button" (click)="sendAdoptionRequest(item)">
+                Submit request
+              </button>
+            </div>
           }
 
           @if (item.requestSent) {
-            <div class="meta">Request sent successfully.</div>
+            <div class="status-badge info">Request sent successfully.</div>
           }
         }
 
         @if (isBusinessPost(item)) {
           <div class="meta">Business post</div>
         }
+
+        <div class="comments-block">
+          <button class="secondary-btn" type="button" (click)="toggleComments(item)">
+            {{ item.commentsOpen ? 'Hide comments' : 'Show comments' }}
+          </button>
+
+          @if (item.commentsOpen) {
+            <div class="comments-panel">
+              @if (item.commentsLoading) {
+                <div class="comments-state">Loading comments...</div>
+              }
+
+              @if (item.commentsError) {
+                <div class="comments-error">{{ item.commentsError }}</div>
+              }
+
+              <div class="comment-form">
+                <textarea
+                  class="text-input"
+                  [(ngModel)]="item.newCommentText"
+                  placeholder="Write a comment..."
+                ></textarea>
+
+                <button
+                  class="action-btn"
+                  type="button"
+                  (click)="addComment(item)"
+                  [disabled]="!canComment(item)"
+                >
+                  {{ item.isSubmittingComment ? 'Posting...' : 'Add comment' }}
+                </button>
+              </div>
+
+              @if (!item.commentsLoading && item.comments.length === 0) {
+                <div class="comments-state">No comments yet.</div>
+              }
+
+              <div class="comments-list">
+                @for (comment of item.comments; track comment.commentId) {
+                  <div class="comment-card">
+                    <div class="comment-header">
+                      <span class="comment-user">
+                        {{ comment.displayUser || comment.userId }}
+                      </span>
+                      <span class="comment-time">{{ comment.time }}</span>
+                    </div>
+
+                    <div class="comment-body">{{ comment.comment }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
       </article>
     }
 

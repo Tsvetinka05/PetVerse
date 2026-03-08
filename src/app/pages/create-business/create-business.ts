@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 
 import { BusinessService } from '../../services/business.service';
 import { ActiveProfileService } from '../../services/active-profile.service';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-create-business',
@@ -18,6 +19,7 @@ export class CreateBusiness {
   private readonly router = inject(Router);
   private readonly businessService = inject(BusinessService);
   private readonly profiles = inject(ActiveProfileService);
+  private readonly auth = inject(AuthService);
 
   logoFile: File | null = null;
   isSubmitting = false;
@@ -74,7 +76,11 @@ export class CreateBusiness {
           const id = typeof created.id === 'string' ? Number(created.id) : created.id;
 
           if (id != null && Number.isFinite(id)) {
-            localStorage.setItem('petverse_last_business_id', String(id));
+            const userId = this.auth.getCurrentUserId();
+            if (userId) {
+              localStorage.setItem(`petverse_business_id_${userId}`, String(id));
+            }
+
             this.profiles.setBusinessAsActive(id, true);
             this.router.navigate(['/business', id]);
             return;
