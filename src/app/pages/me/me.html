@@ -5,22 +5,21 @@
 <h3>Switch to:</h3>
 
 <div style="display: flex; gap: 12px; margin-top: 12px">
-  @if (businessId) {
+  @if (hasBusinessProfile) {
     <button mat-raised-button color="primary" (click)="goToBusiness()">
       Go to Business Profile
     </button>
-  }
-
-  @if (!businessId) {
+  } @else {
     <button mat-raised-button color="accent" (click)="goToCreateBusiness()">
       Create business profile
     </button>
   }
 
-  <button mat-raised-button color="primary" (click)="goToShelter()" [disabled]="!shelterId">
-    Go to Shelter Profile
-  </button>
+  @if (hasShelterProfile) {
+    <button mat-raised-button color="primary" (click)="goToShelter()">Go to Shelter Profile</button>
+  } @else {
+    <button mat-raised-button color="accent" (click)="goToCreateShelter()">
+      Create shelter profile
+    </button>
+  }
 </div>
-
-<p style="margin-top: 16px">Business ID: {{ businessId }}</p>
-<p>Shelter ID: {{ shelterId }}</p>

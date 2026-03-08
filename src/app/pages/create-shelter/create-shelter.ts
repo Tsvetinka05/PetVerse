@@ -8,6 +8,7 @@ import { finalize } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ActiveProfileService } from '../../services/active-profile.service';
+import { AuthService } from '../../services/auth';
 
 interface CreateShelterResponse {
   id?: number;
@@ -26,6 +27,7 @@ export class CreateShelter {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly profiles = inject(ActiveProfileService);
+  private readonly auth = inject(AuthService);
 
   isSubmitting = false;
   errorMessage = '';
@@ -93,9 +95,12 @@ export class CreateShelter {
           const id = idRaw != null ? Number(idRaw) : null;
 
           if (id != null && Number.isFinite(id)) {
-            localStorage.setItem('petverse_last_shelter_id', String(id));
-            this.profiles.setShelterAsActive(id, true);
+            const userId = this.auth.getCurrentUserId();
+            if (userId) {
+              localStorage.setItem(`petverse_shelter_id_${userId}`, String(id));
+            }
 
+            this.profiles.setShelterAsActive(id, true);
             this.router.navigate(['/shelter', id]);
             return;
           }
@@ -109,6 +114,7 @@ export class CreateShelter {
             err?.error?.error ||
             (typeof err?.error === 'string' ? err.error : '') ||
             'Failed to create shelter.';
+
           this.errorMessage = status ? `Failed (${status}) ${msg}` : msg;
         },
       });

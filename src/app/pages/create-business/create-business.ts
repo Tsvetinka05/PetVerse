@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 
 import { BusinessService } from '../../services/business.service';
 import { ActiveProfileService } from '../../services/active-profile.service';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-create-business',
@@ -18,6 +19,7 @@ export class CreateBusiness {
   private readonly router = inject(Router);
   private readonly businessService = inject(BusinessService);
   private readonly profiles = inject(ActiveProfileService);
+  private readonly auth = inject(AuthService);
 
   logoFile: File | null = null;
   isSubmitting = false;
@@ -62,9 +64,9 @@ export class CreateBusiness {
 
     this.businessService
       .createBusiness({
-        address: v.address,
-        name: v.name,
-        description: v.description,
+        address: v.address.trim(),
+        name: v.name.trim(),
+        description: v.description.trim(),
         identificationNumber: v.identificationNumber?.trim() || undefined,
         logo: this.logoFile,
       })
@@ -72,9 +74,19 @@ export class CreateBusiness {
       .subscribe({
         next: (created) => {
           const id = typeof created.id === 'string' ? Number(created.id) : created.id;
-          this.profiles.switchTo({ type: 'business', id }, true);
-          this.router.navigate(['/business', id]);
-          this.router.navigate(['/business', created.id]);
+
+          if (id != null && Number.isFinite(id)) {
+            const userId = this.auth.getCurrentUserId();
+            if (userId) {
+              localStorage.setItem(`petverse_business_id_${userId}`, String(id));
+            }
+
+            this.profiles.setBusinessAsActive(id, true);
+            this.router.navigate(['/business', id]);
+            return;
+          }
+
+          this.router.navigate(['/me']);
         },
         error: (err) => {
           this.errorMessage =
