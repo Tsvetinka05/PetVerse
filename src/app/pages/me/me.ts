@@ -7,7 +7,6 @@ import { MatCardModule } from '@angular/material/card';
 
 import { ActiveProfileService } from '../../services/active-profile.service';
 import { AuthService } from '../../services/auth';
-import { BusinessService } from '../../services/business.service';
 
 @Component({
   selector: 'app-me',
@@ -20,7 +19,6 @@ export class Me implements OnInit {
   private readonly router = inject(Router);
   private readonly profiles = inject(ActiveProfileService);
   private readonly auth = inject(AuthService);
-  private readonly business = inject(BusinessService);
 
   username = '';
   businessId: number | null = null;
@@ -32,42 +30,43 @@ export class Me implements OnInit {
       return;
     }
 
-    this.username = 'tsveti';
+    this.username = this.auth.getUsername() ?? 'Unknown user';
 
     this.businessId = this.readNumber('petverse_last_business_id');
     this.shelterId = this.readNumber('petverse_last_shelter_id');
 
     this.profiles.setUserAsActive(false);
-
-    this.validateBusinessId();
   }
 
-  private validateBusinessId(): void {
-    if (!this.businessId) return;
-
-    const id = this.businessId;
-
-    this.business.getBusinessById(id).subscribe((profile) => {
-      if (!profile) {
-        localStorage.removeItem('petverse_last_business_id');
-        this.businessId = null;
-      }
-    });
+  get hasBusinessProfile(): boolean {
+    return this.businessId !== null;
   }
 
-  goToBusiness(): void {
-    if (!this.businessId) return;
-
-    this.profiles.setBusinessAsActive(this.businessId, true);
-    this.router.navigate(['/business', this.businessId]);
+  get hasShelterProfile(): boolean {
+    return this.shelterId !== null;
   }
 
   goToCreateBusiness(): void {
     this.router.navigate(['/create-business']);
   }
 
+  goToCreateShelter(): void {
+    this.router.navigate(['/create-shelter']);
+  }
+
+  goToBusiness(): void {
+    if (this.businessId === null) {
+      return;
+    }
+
+    this.profiles.setBusinessAsActive(this.businessId, true);
+    this.router.navigate(['/business', this.businessId]);
+  }
+
   goToShelter(): void {
-    if (!this.shelterId) return;
+    if (this.shelterId === null) {
+      return;
+    }
 
     this.profiles.setShelterAsActive(this.shelterId, true);
     this.router.navigate(['/shelter', this.shelterId]);
@@ -75,7 +74,10 @@ export class Me implements OnInit {
 
   private readNumber(key: string): number | null {
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
+
+    if (raw === null || raw.trim() === '') {
+      return null;
+    }
 
     const n = Number(raw);
     return Number.isFinite(n) ? n : null;

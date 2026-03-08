@@ -1,7 +1,11 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 import { FeedService, FeedPostDto } from '../../services/feed.service';
+import { UserPostsService } from '../../services/user-posts.service';
+import { AuthService } from '../../services/auth';
+import { AdoptionRequestsService } from '../../services/adoption-requests.service';
 
 interface FeedCardVm {
   id: number;
@@ -11,28 +15,40 @@ interface FeedCardVm {
   imgUrl: string | null;
   imgBroken: boolean;
   rawPhotoPath: string | null;
+  userId: string | null;
+  status: string;
+  type: string;
+  requestOpen: boolean;
+  requestMessage: string;
+  requestSent: boolean;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
+  imports: [FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
 export class Home implements OnInit, OnDestroy {
   private readonly feedService = inject(FeedService);
+  private readonly userPostsService = inject(UserPostsService);
+  private readonly auth = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly adoptionService = inject(AdoptionRequestsService);
 
   loading = false;
   error = '';
   pageNumber = 1;
   hasMore = true;
+  currentUserId: string | null = null;
 
   feed: FeedCardVm[] = [];
 
   private readonly subs = new Subscription();
 
   ngOnInit(): void {
+    this.currentUserId = this.auth.getCurrentUserId();
     this.loadFirstPage();
   }
 
@@ -61,6 +77,126 @@ export class Home implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  openRequestBox(item: FeedCardVm): void {
+    item.requestOpen = !item.requestOpen;
+    this.cdr.detectChanges();
+  }
+
+  sendAdoptionRequest(item: FeedCardVm): void {
+    if (!item.requestMessage.trim()) {
+      this.error = 'Please enter a message for the adoption request.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const sub = this.adoptionService
+      .createRequest({
+        adoptionPostId: item.id,
+        message: item.requestMessage.trim(),
+      })
+      .subscribe({
+        next: () => {
+          item.requestSent = true;
+          item.requestOpen = false;
+          item.requestMessage = '';
+          this.error = '';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Adoption request failed', err);
+          this.error =
+            err?.error?.message ||
+            err?.error?.error ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            `Adoption request failed (${err?.status ?? 'unknown error'}).`;
+          this.cdr.detectChanges();
+        },
+      });
+
+    this.subs.add(sub);
+  }
+
+  private normalize(value: string | null | undefined): string {
+    return (value ?? '').toLowerCase().trim();
+  }
+
+  isLostAnimalPost(item: FeedCardVm): boolean {
+    const status = this.normalize(item.status);
+    return status === 'notfound' || status === 'missing' || status === 'found';
+  }
+
+  isShelterAdoptionPost(item: FeedCardVm): boolean {
+    const status = this.normalize(item.status);
+    return status === 'available' || status === 'adopted';
+  }
+
+  isBusinessPost(item: FeedCardVm): boolean {
+    return !this.isLostAnimalPost(item) && !this.isShelterAdoptionPost(item);
+  }
+
+  isFound(item: FeedCardVm): boolean {
+    return this.normalize(item.status) === 'found';
+  }
+
+  isAdopted(item: FeedCardVm): boolean {
+    return this.normalize(item.status) === 'adopted';
+  }
+
+  isAvailable(item: FeedCardVm): boolean {
+    return this.normalize(item.status) === 'available';
+  }
+
+  isOwner(item: FeedCardVm): boolean {
+    if (!this.currentUserId || !item.userId) {
+      return false;
+    }
+
+    return item.userId === this.currentUserId;
+  }
+
+  canMarkAsFound(item: FeedCardVm): boolean {
+    return this.isLostAnimalPost(item) && this.isOwner(item) && !this.isFound(item);
+  }
+
+  canSendAdoptionRequest(item: FeedCardVm): boolean {
+    return (
+      this.isShelterAdoptionPost(item) &&
+      this.isAvailable(item) &&
+      !!this.currentUserId &&
+      !item.requestSent
+    );
+  }
+
+  markAsFound(item: FeedCardVm): void {
+    if (!this.canMarkAsFound(item)) {
+      return;
+    }
+
+    const sub = this.userPostsService.markLostAnimalPostAsFound(item.id).subscribe({
+      next: (updatedPost) => {
+        const target = this.feed.find((x) => x.id === item.id);
+        if (!target) {
+          return;
+        }
+
+        target.status = updatedPost.status ?? 'found';
+        this.error = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Mark as found failed:', err);
+        this.error =
+          err?.error?.message ||
+          err?.error?.error ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          `Failed to mark post as found (${err?.status ?? 'unknown error'}).`;
+        this.cdr.detectChanges();
+      },
+    });
+
+    this.subs.add(sub);
+  }
+
   private loadPage(page: number, replace: boolean): void {
     this.loading = true;
     this.error = '';
@@ -75,10 +211,6 @@ export class Home implements OnInit, OnDestroy {
         } else {
           this.feed = [...this.feed, ...mapped];
         }
-
-        console.log('items from api:', items);
-        console.log('mapped:', mapped);
-        console.log('feed after set:', this.feed);
 
         this.feed.sort((a, b) => {
           return new Date(b.published).getTime() - new Date(a.published).getTime();
@@ -107,20 +239,20 @@ export class Home implements OnInit, OnDestroy {
       (p.mediaPaths && p.mediaPaths.length > 0 ? p.mediaPaths[0] : null) ||
       null;
 
-    const imgUrl = rawPhotoPath;
-
-    console.log('feed dto =', p);
-    console.log('rawPhotoPath =', rawPhotoPath);
-    console.log('imgUrl =', imgUrl);
-
     return {
       id: p.id,
       title: p.title ?? '',
       body: p.body ?? '',
       published: p.published ?? '',
-      imgUrl,
+      imgUrl: rawPhotoPath,
       imgBroken: false,
       rawPhotoPath,
+      userId: p.userId ?? null,
+      status: p.status ?? '',
+      type: p.type ?? '',
+      requestOpen: false,
+      requestMessage: '',
+      requestSent: false,
     };
   }
 }

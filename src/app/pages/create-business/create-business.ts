@@ -62,9 +62,9 @@ export class CreateBusiness {
 
     this.businessService
       .createBusiness({
-        address: v.address,
-        name: v.name,
-        description: v.description,
+        address: v.address.trim(),
+        name: v.name.trim(),
+        description: v.description.trim(),
         identificationNumber: v.identificationNumber?.trim() || undefined,
         logo: this.logoFile,
       })
@@ -72,9 +72,15 @@ export class CreateBusiness {
       .subscribe({
         next: (created) => {
           const id = typeof created.id === 'string' ? Number(created.id) : created.id;
-          this.profiles.switchTo({ type: 'business', id }, true);
-          this.router.navigate(['/business', id]);
-          this.router.navigate(['/business', created.id]);
+
+          if (id != null && Number.isFinite(id)) {
+            localStorage.setItem('petverse_last_business_id', String(id));
+            this.profiles.setBusinessAsActive(id, true);
+            this.router.navigate(['/business', id]);
+            return;
+          }
+
+          this.router.navigate(['/me']);
         },
         error: (err) => {
           this.errorMessage =

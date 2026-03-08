@@ -95,7 +95,6 @@ export class CreateShelter {
           if (id != null && Number.isFinite(id)) {
             localStorage.setItem('petverse_last_shelter_id', String(id));
             this.profiles.setShelterAsActive(id, true);
-
             this.router.navigate(['/shelter', id]);
             return;
           }
@@ -109,6 +108,7 @@ export class CreateShelter {
             err?.error?.error ||
             (typeof err?.error === 'string' ? err.error : '') ||
             'Failed to create shelter.';
+
           this.errorMessage = status ? `Failed (${status}) ${msg}` : msg;
         },
       });

@@ -81,3 +81,18 @@
   opacity: 0.65;
   cursor: not-allowed;
 }
+.action-btn {
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 18px;
+  border: 1px solid #d6d6d6;
+  background: #f6f6f6;
+  color: #1e63ff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #ececec;
+}

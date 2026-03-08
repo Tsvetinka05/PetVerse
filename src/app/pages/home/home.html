@@ -27,18 +27,60 @@
 
         <p class="body">{{ item.body }}</p>
 
-        <div class="meta">rawPhotoPath: {{ item.rawPhotoPath }}</div>
-        <div class="meta">imgUrl: {{ item.imgUrl }}</div>
-
         @if (!item.imgBroken && item.imgUrl) {
           <img class="img" [src]="item.imgUrl" [alt]="item.title" (error)="onImgError(item)" />
         }
 
         @if (item.imgBroken) {
-          <div class="meta">Image failed to load: {{ item.imgUrl }}</div>
+          <div class="meta">Image failed to load</div>
         }
 
         <div class="meta">Published: {{ item.published }}</div>
+
+        @if (isLostAnimalPost(item)) {
+          @if (isFound(item)) {
+            <div class="meta">The animal was found.</div>
+          } @else {
+            <div class="meta">Status: {{ item.status || 'missing' }}</div>
+
+            @if (canMarkAsFound(item)) {
+              <button class="nav-btn" type="button" (click)="markAsFound(item)">
+                Mark as found
+              </button>
+            }
+          }
+        }
+
+        @if (isShelterAdoptionPost(item)) {
+          <div class="meta">Status: {{ item.status || 'available' }}</div>
+
+          @if (isAdopted(item)) {
+            <div class="meta">This animal has already been adopted.</div>
+          }
+
+          @if (canSendAdoptionRequest(item)) {
+            <button type="button" (click)="openRequestBox(item)">
+              {{ item.requestOpen ? 'Cancel' : 'Send adoption request' }}
+            </button>
+          }
+
+          @if (item.requestOpen) {
+            <textarea
+              [(ngModel)]="item.requestMessage"
+              placeholder="Why do you want to adopt this animal?"
+            ></textarea>
+
+            <button type="button" (click)="sendAdoptionRequest(item)">Submit request</button>
+          }
+
+          @if (item.requestSent) {
+            <div class="meta">Request sent successfully.</div>
+          }
+        }
+
+        @if (isBusinessPost(item)) {
+          <div class="meta">Business post</div>
+        }
       </article>
     }
 

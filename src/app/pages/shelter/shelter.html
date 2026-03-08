@@ -34,7 +34,7 @@
       <p class="empty-posts">No posts yet.</p>
     }
 
-    @for (p of posts; track p.published + p.title + p.body) {
+    @for (p of posts; track p.id) {
       <div class="post-card">
         <h3>{{ p.title }}</h3>
 
@@ -47,6 +47,58 @@
         <p><strong>Type:</strong> {{ p.type }}</p>
         <p><strong>Status:</strong> {{ p.status }}</p>
         <p class="meta">Published: {{ p.published }}</p>
+
+        @if (p.adoptedAt) {
+          <p class="meta"><strong>Adopted at:</strong> {{ p.adoptedAt }}</p>
+        }
+
+        @if (p.requests?.length) {
+          <div class="requests-section">
+            <h4>Adoption Requests</h4>
+
+            @for (r of p.requests; track r.id) {
+              <div class="request-card">
+                <p><strong>User:</strong> {{ r.userId }}</p>
+                <p><strong>Message:</strong> {{ r.message }}</p>
+                <p><strong>Request status:</strong> {{ r.status }}</p>
+
+                @if (canMarkAsAdopted(p) && r.status !== 'accepted') {
+                  <button
+                    type="button"
+                    (click)="markAsAdoptedForUser(p, r.userId)"
+                    [disabled]="p.isUpdating"
+                  >
+                    {{ p.isUpdating ? 'Updating...' : 'Accept and mark adopted' }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (canMarkAsAdopted(p)) {
+          <div style="display: flex; flex-direction: column; gap: 8px; max-width: 360px">
+            <input type="text" [(ngModel)]="p.approvedUserId" placeholder="User id" />
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button
+                type="button"
+                (click)="markAsAdoptedForUser(p, p.approvedUserId)"
+                [disabled]="p.isUpdating"
+              >
+                {{ p.isUpdating ? 'Updating...' : 'Mark adopted for user' }}
+              </button>
+
+              <button
+                type="button"
+                (click)="markAsAdoptedOutsidePlatform(p)"
+                [disabled]="p.isUpdating"
+              >
+                {{ p.isUpdating ? 'Updating...' : 'Mark adopted outside platform' }}
+              </button>
+            </div>
+          </div>
+        }
       </div>
     }
   </section>
