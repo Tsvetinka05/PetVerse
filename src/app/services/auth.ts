@@ -59,6 +59,50 @@ export class AuthService {
     this.clearToken();
     this.profiles.clearAll();
   }
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+
+      const payload = parts[1];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+
+      const json = atob(padded);
+      return JSON.parse(json) as Record<string, unknown>;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+
+  getCurrentUserId(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    const payload = this.decodeJwtPayload(token);
+    if (!payload) return null;
+
+    const possibleKeys = [
+      'nameid',
+      'sub',
+      'userId',
+      'id',
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier',
+    ];
+
+    const data = payload as Record<string, unknown>;
+
+    for (const key of possibleKeys) {
+      const value = data[key];
+
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return null;
+  }
 
   private parseJwtToken(text: string): string {
     const trimmed = (text ?? '').trim();

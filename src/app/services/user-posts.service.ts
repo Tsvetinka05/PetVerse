@@ -11,6 +11,10 @@ export interface CreateLostAnimalPostRequest {
   type: PetType;
 }
 
+export interface MarkLostAnimalPostAsFoundRequest {
+  lostPostId: number;
+}
+
 export interface LostAnimalPostResponse {
   id: number;
   photoPath: string;
@@ -46,5 +50,12 @@ export class UserPostsService {
     form.append('Photo', payload.photo);
 
     return this.http.post<LostAnimalPostResponse>(this.CREATE_LOST_URL, form, { params });
+  }
+
+  markLostAnimalPostAsFound(lostPostId: number): Observable<LostAnimalPostResponse> {
+    return this.http.put<LostAnimalPostResponse>(
+      `${this.API_BASE}/posts/user/lost_animal/${lostPostId}`,
+      {},
+    );
   }
 }
