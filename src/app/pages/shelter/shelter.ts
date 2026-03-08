@@ -5,7 +5,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { ShelterService, ShelterProfile } from '../../services/shelter.service';
-import { ShelterPostsService, ShelterPostResponse } from '../../services/shelter-posts.service';
+import {
+  ShelterPostsService,
+  ShelterPostResponse,
+  AdoptionRequestDto,
+} from '../../services/shelter-posts.service';
 import { ActiveProfileService } from '../../services/active-profile.service';
 import { AuthService } from '../../services/auth';
 
@@ -134,6 +138,12 @@ export class ShelterPage implements OnInit {
       published: post.published ?? '',
       adoptedAt: post.adoptedAt ?? null,
       photoUrl: post.photo ?? null,
+      requests: (post.requests ?? []).map((r: AdoptionRequestDto) => ({
+        id: r.id,
+        userId: r.userId,
+        message: r.message,
+        status: r.status ?? 'new',
+      })),
       approvedUserId: '',
       isUpdating: false,
     };
@@ -152,14 +162,28 @@ export class ShelterPage implements OnInit {
     return this.isActiveShelterOwner() && post.status !== 'adopted' && !post.isUpdating;
   }
 
-  markAsAdopted(post: ShelterPostVm): void {
+  markAsAdoptedForUser(post: ShelterPostVm, userId: string): void {
+    const normalizedUserId = (userId ?? '').trim();
+
+    if (!normalizedUserId) {
+      this.errorMessage = 'Missing user id.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.submitAdoption(post, normalizedUserId);
+  }
+
+  markAsAdoptedOutsidePlatform(post: ShelterPostVm): void {
     if (!this.canMarkAsAdopted(post)) {
       return;
     }
 
-    if (!post.approvedUserId.trim()) {
-      this.errorMessage = 'Enter the approved user id before marking as adopted.';
-      this.cdr.detectChanges();
+    this.submitAdoption(post);
+  }
+
+  private submitAdoption(post: ShelterPostVm, userId?: string): void {
+    if (!this.canMarkAsAdopted(post)) {
       return;
     }
 
@@ -169,13 +193,33 @@ export class ShelterPage implements OnInit {
 
     this.postsService
       .markAsAdopted({
-        adoptionPostId: post.id,
-        userId: post.approvedUserId.trim(),
+        postId: post.id,
+        userId,
       })
       .subscribe({
         next: (updated) => {
           post.status = (updated.status as 'available' | 'adopted') ?? 'adopted';
           post.adoptedAt = updated.adoptedAt ?? new Date().toISOString();
+
+          if (updated.requests && updated.requests.length > 0) {
+            post.requests = updated.requests.map((r) => ({
+              id: r.id,
+              userId: r.userId,
+              message: r.message,
+              status: r.status ?? 'new',
+            }));
+          } else if (userId) {
+            post.requests = post.requests.map((r) => ({
+              ...r,
+              status: r.userId === userId ? 'accepted' : 'rejected',
+            }));
+          } else {
+            post.requests = post.requests.map((r) => ({
+              ...r,
+              status: 'rejected',
+            }));
+          }
+
           post.isUpdating = false;
           this.cdr.detectChanges();
         },
@@ -202,6 +246,13 @@ export class ShelterPage implements OnInit {
   }
 }
 
+interface AdoptionRequestVm {
+  id: number;
+  userId: string;
+  message: string;
+  status: 'new' | 'accepted' | 'rejected' | string;
+}
+
 interface ShelterPostVm {
   id: number;
   shelterId: number;
@@ -212,6 +263,7 @@ interface ShelterPostVm {
   published: string;
   adoptedAt: string | null;
   photoUrl: string | null;
+  requests: AdoptionRequestVm[];
   approvedUserId: string;
   isUpdating: boolean;
 }

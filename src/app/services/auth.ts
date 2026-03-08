@@ -59,6 +59,7 @@ export class AuthService {
     this.clearToken();
     this.profiles.clearAll();
   }
+
   private decodeJwtPayload(token: string): Record<string, unknown> | null {
     try {
       const parts = token.split('.');
@@ -126,9 +127,36 @@ export class AuthService {
       .pipe(
         map((text) => ({ jwtToken: this.parseJwtToken(text) }) as LoginResponse),
         tap((res) => {
-          if (res.jwtToken) this.setToken(res.jwtToken);
+          localStorage.removeItem('petverse_active_profile');
+          localStorage.removeItem('petverse_profile_history');
+
+          if (res?.jwtToken) {
+            this.setToken(res.jwtToken);
+          }
         }),
       );
+  }
+  getUsername(): string | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    const payload = this.decodeJwtPayload(token);
+    if (!payload) {
+      return null;
+    }
+
+    const possibleKeys = ['unique_name', 'name', 'sub', 'username'];
+
+    for (const key of possibleKeys) {
+      const value = payload[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return null;
   }
 
   register(payload: RegisterRequest): Observable<RegisterResponse> {

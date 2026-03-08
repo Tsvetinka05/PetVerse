@@ -52,13 +52,51 @@
           <p class="meta"><strong>Adopted at:</strong> {{ p.adoptedAt }}</p>
         }
 
-        @if (canMarkAsAdopted(p)) {
-          <div style="display: flex; flex-direction: column; gap: 8px; max-width: 320px">
-            <input type="text" [(ngModel)]="p.approvedUserId" placeholder="Approved user id" />
+        @if (p.requests?.length) {
+          <div class="requests-section">
+            <h4>Adoption Requests</h4>
 
-            <button type="button" (click)="markAsAdopted(p)" [disabled]="p.isUpdating">
-              {{ p.isUpdating ? 'Updating...' : 'Mark as adopted' }}
-            </button>
+            @for (r of p.requests; track r.id) {
+              <div class="request-card">
+                <p><strong>User:</strong> {{ r.userId }}</p>
+                <p><strong>Message:</strong> {{ r.message }}</p>
+                <p><strong>Request status:</strong> {{ r.status }}</p>
+
+                @if (canMarkAsAdopted(p) && r.status !== 'accepted') {
+                  <button
+                    type="button"
+                    (click)="markAsAdoptedForUser(p, r.userId)"
+                    [disabled]="p.isUpdating"
+                  >
+                    {{ p.isUpdating ? 'Updating...' : 'Accept and mark adopted' }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (canMarkAsAdopted(p)) {
+          <div style="display: flex; flex-direction: column; gap: 8px; max-width: 360px">
+            <input type="text" [(ngModel)]="p.approvedUserId" placeholder="User id" />
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button
+                type="button"
+                (click)="markAsAdoptedForUser(p, p.approvedUserId)"
+                [disabled]="p.isUpdating"
+              >
+                {{ p.isUpdating ? 'Updating...' : 'Mark adopted for user' }}
+              </button>
+
+              <button
+                type="button"
+                (click)="markAsAdoptedOutsidePlatform(p)"
+                [disabled]="p.isUpdating"
+              >
+                {{ p.isUpdating ? 'Updating...' : 'Mark adopted outside platform' }}
+              </button>
+            </div>
           </div>
         }
       </div>
