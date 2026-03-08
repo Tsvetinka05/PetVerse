@@ -34,7 +34,7 @@
       <p class="empty-posts">No posts yet.</p>
     }
 
-    @for (p of posts; track p.published + p.title + p.body) {
+    @for (p of posts; track p.id) {
       <div class="post-card">
         <h3>{{ p.title }}</h3>
 
@@ -47,6 +47,20 @@
         <p><strong>Type:</strong> {{ p.type }}</p>
         <p><strong>Status:</strong> {{ p.status }}</p>
         <p class="meta">Published: {{ p.published }}</p>
+
+        @if (p.adoptedAt) {
+          <p class="meta"><strong>Adopted at:</strong> {{ p.adoptedAt }}</p>
+        }
+
+        @if (canMarkAsAdopted(p)) {
+          <div style="display: flex; flex-direction: column; gap: 8px; max-width: 320px">
+            <input type="text" [(ngModel)]="p.approvedUserId" placeholder="Approved user id" />
+
+            <button type="button" (click)="markAsAdopted(p)" [disabled]="p.isUpdating">
+              {{ p.isUpdating ? 'Updating...' : 'Mark as adopted' }}
+            </button>
+          </div>
+        }
       </div>
     }
   </section>

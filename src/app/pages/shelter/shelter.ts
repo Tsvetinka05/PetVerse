@@ -1,5 +1,6 @@
 import { Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
@@ -11,7 +12,7 @@ import { AuthService } from '../../services/auth';
 @Component({
   selector: 'app-shelter-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './shelter.html',
   styleUrl: './shelter.scss',
 })
@@ -124,13 +125,71 @@ export class ShelterPage implements OnInit {
 
   private mapPost(post: ShelterPostResponse): ShelterPostVm {
     return {
+      id: post.id,
+      shelterId: post.shelterId,
       title: post.title ?? '',
       body: post.body ?? '',
-      type: post.type,
-      status: post.status,
+      type: (post.type as 'dog' | 'cat' | 'other') ?? 'dog',
+      status: (post.status as 'available' | 'adopted') ?? 'available',
       published: post.published ?? '',
+      adoptedAt: post.adoptedAt ?? null,
       photoUrl: post.photo ?? null,
+      approvedUserId: '',
+      isUpdating: false,
     };
+  }
+
+  isActiveShelterOwner(): boolean {
+    const active = this.profiles.active();
+    if (active.type !== 'shelter' || active.id == null || !this.shelter) {
+      return false;
+    }
+
+    return Number(active.id) === Number(this.shelter.id);
+  }
+
+  canMarkAsAdopted(post: ShelterPostVm): boolean {
+    return this.isActiveShelterOwner() && post.status !== 'adopted' && !post.isUpdating;
+  }
+
+  markAsAdopted(post: ShelterPostVm): void {
+    if (!this.canMarkAsAdopted(post)) {
+      return;
+    }
+
+    if (!post.approvedUserId.trim()) {
+      this.errorMessage = 'Enter the approved user id before marking as adopted.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    post.isUpdating = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
+    this.postsService
+      .markAsAdopted({
+        adoptionPostId: post.id,
+        userId: post.approvedUserId.trim(),
+      })
+      .subscribe({
+        next: (updated) => {
+          post.status = (updated.status as 'available' | 'adopted') ?? 'adopted';
+          post.adoptedAt = updated.adoptedAt ?? new Date().toISOString();
+          post.isUpdating = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Failed to mark post as adopted', err);
+          post.isUpdating = false;
+          this.errorMessage =
+            err?.error?.message ||
+            err?.error?.error ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            'Failed to mark animal as adopted.';
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   goHome(): void {
@@ -144,10 +203,15 @@ export class ShelterPage implements OnInit {
 }
 
 interface ShelterPostVm {
+  id: number;
+  shelterId: number;
   title: string;
   body: string;
-  type: 'dog' | 'cat';
+  type: 'dog' | 'cat' | 'other';
   status: 'available' | 'adopted';
   published: string;
+  adoptedAt: string | null;
   photoUrl: string | null;
+  approvedUserId: string;
+  isUpdating: boolean;
 }
