@@ -29,7 +29,4 @@ export class AdoptionRequestsService {
   getRequestById(id: number): Observable<unknown> {
     return this.http.get(`${this.URL}/${id}`);
   }
-  getRequestsForPost(postId: number): Observable<AdoptionRequestResponse[]> {
-    return this.http.get<AdoptionRequestResponse[]>(`/api/adoption_requests/post/${postId}`);
-  }
 }

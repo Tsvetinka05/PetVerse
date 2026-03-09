@@ -4,13 +4,6 @@ import { Observable } from 'rxjs';
 
 export type AnimalType = 'dog' | 'cat' | 'other';
 
-export interface AdoptionRequestDto {
-  id: number;
-  userId: string;
-  message: string;
-  status: 'new' | 'accepted' | 'rejected' | string;
-}
-
 export interface CreateShelterPostRequest {
   photo: File;
   title: string;
@@ -18,10 +11,18 @@ export interface CreateShelterPostRequest {
   type: AnimalType;
   shelterId: number;
 }
+export interface AdoptionRequestDto {
+  id: number;
+  adoptionPostId: number;
+  userId?: string;
+  message: string;
+  status: 'new' | 'accepted' | 'rejected' | string;
+}
 
 export interface ShelterPostResponse {
   id: number;
-  photo: string;
+  photo?: string;
+  photoPath?: string;
   title: string;
   body: string;
   type: AnimalType | string;
@@ -30,11 +31,11 @@ export interface ShelterPostResponse {
   published: string;
   adoptedAt?: string | null;
   status: 'available' | 'adopted' | string;
-  requests?: AdoptionRequestDto[];
+  adoptionRequestResponseDTOs?: AdoptionRequestDto[];
 }
 
 export interface MarkShelterPostAsAdoptedRequest {
-  postId: number;
+  adoptionPostId: number;
   userId?: string;
 }
 
@@ -43,7 +44,6 @@ export class ShelterPostsService {
   private readonly http = inject(HttpClient);
 
   private readonly CREATE_URL = '/api/posts/shelter/animal_adoption';
-  private readonly GET_BY_SHELTER_URL = '/api/posts/shelter';
   private readonly GET_BY_ID_URL = '/api/posts/shelter/animal_adoption';
   private readonly MARK_ADOPTED_URL = '/api/posts/shelter/animal_adoption/adopt';
 
@@ -61,7 +61,7 @@ export class ShelterPostsService {
   }
 
   getPostsByShelterId(shelterId: number): Observable<ShelterPostResponse[]> {
-    return this.http.get<ShelterPostResponse[]>(`${this.GET_BY_SHELTER_URL}/${shelterId}`);
+    return this.http.get<ShelterPostResponse[]>(`/api/posts/shelter/${shelterId}/animal_adoption`);
   }
 
   getShelterPostById(id: number): Observable<ShelterPostResponse> {
@@ -69,8 +69,8 @@ export class ShelterPostsService {
   }
 
   markAsAdopted(payload: MarkShelterPostAsAdoptedRequest): Observable<ShelterPostResponse> {
-    const body: { postId: number; userId?: string } = {
-      postId: payload.postId,
+    const body: { adoptionPostId: number; userId?: string } = {
+      adoptionPostId: payload.adoptionPostId,
     };
 
     if (payload.userId && payload.userId.trim().length > 0) {

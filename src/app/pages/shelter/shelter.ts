@@ -136,11 +136,11 @@ export class ShelterPage implements OnInit {
       status: (post.status as 'available' | 'adopted') ?? 'available',
       published: post.published ?? '',
       adoptedAt: post.adoptedAt ?? null,
-      photoUrl: post.photo ?? null,
-      requests: (post.requests ?? []).map((r: AdoptionRequestDto) => ({
+      photoUrl: post.photo ?? post.photoPath ?? null,
+      requests: (post.adoptionRequestResponseDTOs ?? []).map((r: AdoptionRequestDto) => ({
         id: r.id,
-        userId: r.userId,
-        message: r.message,
+        userId: r.userId ?? '',
+        message: r.message ?? '',
         status: r.status ?? 'new',
       })),
       approvedUserId: '',
@@ -192,7 +192,7 @@ export class ShelterPage implements OnInit {
 
     this.postsService
       .markAsAdopted({
-        postId: post.id,
+        adoptionPostId: post.id,
         userId,
       })
       .subscribe({
@@ -200,20 +200,22 @@ export class ShelterPage implements OnInit {
           post.status = (updated.status as 'available' | 'adopted') ?? 'adopted';
           post.adoptedAt = updated.adoptedAt ?? new Date().toISOString();
 
-          if (updated.requests && updated.requests.length > 0) {
-            post.requests = updated.requests.map((r) => ({
+          if (
+            updated.adoptionRequestResponseDTOs &&
+            updated.adoptionRequestResponseDTOs.length > 0
+          ) {
+            post.requests = updated.adoptionRequestResponseDTOs.map((r: AdoptionRequestDto) => ({
               id: r.id,
-              userId: r.userId,
-              message: r.message,
+              userId: r.userId ?? '',
+              message: r.message ?? '',
               status: r.status ?? 'new',
             }));
-          } else if (userId) {
-            post.requests = post.requests.map((r) => ({
+            post.requests = post.requests.map((r: AdoptionRequestVm) => ({
               ...r,
               status: r.userId === userId ? 'accepted' : 'rejected',
             }));
           } else {
-            post.requests = post.requests.map((r) => ({
+            post.requests = post.requests.map((r: AdoptionRequestVm) => ({
               ...r,
               status: 'rejected',
             }));
