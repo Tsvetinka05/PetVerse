@@ -47,4 +47,11 @@ export class UserPostsService {
 
     return this.http.post<LostAnimalPostResponse>(this.CREATE_LOST_URL, form, { params });
   }
+
+  markLostAnimalPostAsFound(lostPostId: number): Observable<LostAnimalPostResponse> {
+    return this.http.put<LostAnimalPostResponse>(
+      `${this.API_BASE}/posts/user/lost_animal/${lostPostId}`,
+      null,
+    );
+  }
 }

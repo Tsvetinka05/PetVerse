@@ -1,39 +1,41 @@
 <div class="page">
-  <h1>Create lost animal post</h1>
+  <div class="form-card">
+    <h1>Create lost animal post</h1>
 
-  <p class="error" [hidden]="!errorMessage">{{ errorMessage }}</p>
+    <p class="error" [hidden]="!errorMessage">{{ errorMessage }}</p>
 
-  <form class="form" [formGroup]="form" (submit)="$event.preventDefault()">
-    <label class="field">
-      <span>Title</span>
-      <input type="text" formControlName="title" />
-    </label>
+    <form class="form" [formGroup]="form" (submit)="$event.preventDefault()">
+      <label class="field">
+        <span>Title</span>
+        <input type="text" formControlName="title" />
+      </label>
 
-    <label class="field">
-      <span>Type</span>
-      <select formControlName="type">
-        <option value="dog">dog</option>
-        <option value="cat">cat</option>
-        <option value="other">other</option>
-      </select>
-    </label>
+      <label class="field">
+        <span>Type</span>
+        <select formControlName="type">
+          <option value="dog">dog</option>
+          <option value="cat">cat</option>
+          <option value="other">other</option>
+        </select>
+      </label>
 
-    <label class="field">
-      <span>Body</span>
-      <textarea rows="6" formControlName="body"></textarea>
-    </label>
+      <label class="field">
+        <span>Body</span>
+        <textarea rows="6" formControlName="body"></textarea>
+      </label>
 
-    <label class="field">
-      <span>Photo</span>
-      <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
-    </label>
+      <label class="field">
+        <span>Photo</span>
+        <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+      </label>
 
-    <div class="actions">
-      <button type="button" (click)="goHome()">Home</button>
+      <div class="actions">
+        <button class="btn-secondary" type="button" (click)="goHome()">Home</button>
 
-      <button type="button" (click)="submit()" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Publishing...' : 'Publish' }}
-      </button>
-    </div>
-  </form>
+        <button class="btn-primary" type="button" (click)="submit()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Publishing...' : 'Publish' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

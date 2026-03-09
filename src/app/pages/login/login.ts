@@ -77,14 +77,43 @@ export class Login {
           this.router.navigate(['/home']);
         },
         error: (err) => {
-          this.errorMessage =
-            err?.error?.error ||
-            err?.error?.message ||
-            err?.message ||
-            'Login failed. Please try again.';
-
+          this.errorMessage = this.extractLoginErrorMessage(err);
           this.snackBar.open(this.errorMessage, 'OK', { duration: 3500 });
         },
       });
+  }
+
+  private extractLoginErrorMessage(err: unknown): string {
+    const error = err as {
+      status?: number;
+      error?: unknown;
+      message?: string;
+    };
+
+    if (error?.status === 401) {
+      return 'Wrong username or password.';
+    }
+
+    if (typeof error?.error === 'string') {
+      const text = error.error.trim();
+
+      if (text.length > 0 && !text.toLowerCase().startsWith('http failure response')) {
+        return text;
+      }
+    }
+
+    if (error?.error && typeof error.error === 'object') {
+      const body = error.error as Record<string, unknown>;
+
+      const candidates = [body['message'], body['error'], body['title'], body['detail']];
+
+      for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim().length > 0) {
+          return candidate;
+        }
+      }
+    }
+
+    return 'Wrong username or password.';
   }
 }

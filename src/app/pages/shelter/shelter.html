@@ -1,40 +1,44 @@
 <div class="profile-page">
-  <h1>Shelter profile</h1>
+  <h1 class="page-title">Shelter profile</h1>
 
   @if (isLoading) {
-    <p>Loading...</p>
+    <p class="state-text">Loading...</p>
   }
 
   @if (!isLoading && errorMessage) {
-    <p class="error">
+    <p class="error-box">
       {{ errorMessage }}
     </p>
   }
 
   @if (!isLoading && !errorMessage && shelter) {
-    <div class="card">
+    <div class="profile-card">
       <img class="logo" [src]="shelter.logoSrc" alt="Shelter logo" [hidden]="!shelter.logoSrc" />
 
-      <h2>{{ shelter.name }}</h2>
+      <div class="profile-info">
+        <h2>{{ shelter.name }}</h2>
 
-      <p><strong>Address:</strong> {{ shelter.address }}</p>
-      <p><strong>IBAN:</strong> {{ shelter.iban }}</p>
+        <p><strong>Address:</strong> {{ shelter.address }}</p>
+        <p><strong>IBAN:</strong> {{ shelter.iban }}</p>
 
-      <div class="actions">
-        <button type="button" (click)="goHome()">Home</button>
-        <button type="button" (click)="switchToUser()">Switch to user profile</button>
+        <div class="actions">
+          <button class="btn-primary" type="button" (click)="goHome()">Home</button>
+          <button class="btn-secondary" type="button" (click)="switchToUser()">
+            Switch to user profile
+          </button>
+        </div>
       </div>
     </div>
   }
 
   <section class="posts-section">
-    <h2>Posts</h2>
+    <h2 class="section-title">Posts</h2>
 
     @if (posts.length === 0) {
       <p class="empty-posts">No posts yet.</p>
     }
 
-    @for (p of posts; track p.published + p.title + p.body) {
+    @for (p of posts; track p.id) {
       <div class="post-card">
         <h3>{{ p.title }}</h3>
 
@@ -44,9 +48,74 @@
           <img [src]="p.photoUrl" class="post-img" alt="Shelter post photo" />
         }
 
-        <p><strong>Type:</strong> {{ p.type }}</p>
-        <p><strong>Status:</strong> {{ p.status }}</p>
-        <p class="meta">Published: {{ p.published }}</p>
+        <div class="post-meta">
+          <p><strong>Type:</strong> {{ p.type }}</p>
+          <p><strong>Status:</strong> {{ p.status }}</p>
+          <p class="meta">Published: {{ p.published }}</p>
+
+          @if (p.adoptedAt) {
+            <p class="meta"><strong>Adopted at:</strong> {{ p.adoptedAt }}</p>
+          }
+        </div>
+
+        @if (p.requests?.length) {
+          <div class="requests-section">
+            <h4>Adoption Requests</h4>
+
+            @for (r of p.requests; track r.id) {
+              <div class="request-card">
+                <div class="request-top">
+                  <p><strong>User:</strong> {{ r.userId }}</p>
+                  <span class="request-status">{{ r.status }}</span>
+                </div>
+
+                <p><strong>Message:</strong> {{ r.message }}</p>
+
+                @if (canMarkAsAdopted(p) && r.status !== 'accepted') {
+                  <button
+                    class="btn-primary"
+                    type="button"
+                    (click)="markAsAdoptedForUser(p, r.userId)"
+                    [disabled]="p.isUpdating"
+                  >
+                    {{ p.isUpdating ? 'Updating...' : 'Accept and mark adopted' }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (canMarkAsAdopted(p)) {
+          <div class="manual-adoption-box">
+            <input
+              class="text-input"
+              type="text"
+              [(ngModel)]="p.approvedUserId"
+              placeholder="User id"
+            />
+
+            <div class="manual-actions">
+              <button
+                class="btn-primary"
+                type="button"
+                (click)="markAsAdoptedForUser(p, p.approvedUserId)"
+                [disabled]="p.isUpdating"
+              >
+                {{ p.isUpdating ? 'Updating...' : 'Mark adopted for user' }}
+              </button>
+
+              <button
+                class="btn-secondary"
+                type="button"
+                (click)="markAsAdoptedOutsidePlatform(p)"
+                [disabled]="p.isUpdating"
+              >
+                {{ p.isUpdating ? 'Updating...' : 'Mark adopted outside platform' }}
+              </button>
+            </div>
+          </div>
+        }
       </div>
     }
   </section>

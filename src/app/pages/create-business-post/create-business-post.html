@@ -1,29 +1,35 @@
 <div class="page">
-  <h1>Create marketing post</h1>
+  <div class="post-card">
+    <h1>Create marketing post</h1>
 
-  <p class="error" [hidden]="!errorMessage">{{ errorMessage }}</p>
+    <p class="error" [hidden]="!errorMessage">{{ errorMessage }}</p>
 
-  <form class="form" (submit)="submit()">
-    <label class="field">
-      <span>Title</span>
-      <input type="text" [formControl]="form.controls.title" />
-    </label>
+    <form class="form" (submit)="submit()">
+      <label class="field">
+        <span>Title</span>
+        <input class="text-input" type="text" [formControl]="form.controls.title" />
+      </label>
 
-    <label class="field">
-      <span>Body</span>
-      <textarea rows="5" [formControl]="form.controls.body"></textarea>
-    </label>
+      <label class="field">
+        <span>Body</span>
+        <textarea
+          class="text-input textarea-input"
+          rows="5"
+          [formControl]="form.controls.body"
+        ></textarea>
+      </label>
 
-    <label class="field">
-      <span>Media (photos/videos)</span>
-      <input type="file" multiple (change)="onFilesSelected($event)" />
-    </label>
+      <label class="field">
+        <span>Media (photos/videos)</span>
+        <input class="file-input" type="file" multiple (change)="onFilesSelected($event)" />
+      </label>
 
-    <div class="actions">
-      <button type="button" (click)="goHome()">Home</button>
-      <button type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Publishing...' : 'Publish' }}
-      </button>
-    </div>
-  </form>
+      <div class="actions">
+        <button class="btn-secondary" type="button" (click)="goHome()">Home</button>
+        <button class="btn-primary" type="submit" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Publishing...' : 'Publish' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
