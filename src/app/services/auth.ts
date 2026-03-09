@@ -56,6 +56,11 @@ export class AuthService {
   }
 
   logout(): void {
+    localStorage.removeItem('petverse_active_profile');
+    localStorage.removeItem('petverse_profile_history');
+    localStorage.removeItem('petverse_last_business_id');
+    localStorage.removeItem('petverse_last_shelter_id');
+
     this.clearToken();
     this.profiles.clearAll();
   }
@@ -130,6 +135,9 @@ export class AuthService {
           localStorage.removeItem('petverse_active_profile');
           localStorage.removeItem('petverse_profile_history');
 
+          localStorage.removeItem('petverse_last_business_id');
+          localStorage.removeItem('petverse_last_shelter_id');
+
           if (res?.jwtToken) {
             this.setToken(res.jwtToken);
           }
@@ -165,7 +173,15 @@ export class AuthService {
       .pipe(
         map((text) => ({ jwtToken: this.parseJwtToken(text) }) as RegisterResponse),
         tap((res) => {
-          if (res.jwtToken) this.setToken(res.jwtToken);
+          localStorage.removeItem('petverse_active_profile');
+          localStorage.removeItem('petverse_profile_history');
+
+          localStorage.removeItem('petverse_last_business_id');
+          localStorage.removeItem('petverse_last_shelter_id');
+
+          if (res.jwtToken) {
+            this.setToken(res.jwtToken);
+          }
         }),
       );
   }

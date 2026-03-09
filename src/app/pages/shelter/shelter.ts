@@ -65,7 +65,6 @@ export class ShelterPage implements OnInit {
       }
 
       this.profiles.setShelterAsActive(numId, false);
-      localStorage.setItem('petverse_last_shelter_id', String(numId));
 
       this.loadShelter(numId);
       this.loadPosts(numId);

@@ -60,7 +60,6 @@ export class BusinessPage implements OnInit {
       }
 
       this.profiles.setBusinessAsActive(numId, false);
-      localStorage.setItem('petverse_last_business_id', String(numId));
 
       this.loadBusiness(numId);
       this.loadPosts(numId);
