@@ -66,3 +66,40 @@
   opacity: 0.7;
   margin-top: 8px;
 }
+.profile-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+}
+
+.profile-actions button {
+  padding: 8px 18px;
+  border-radius: 22px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* primary button */
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #1e63ff;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
