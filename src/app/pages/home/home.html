@@ -35,7 +35,7 @@
           <div class="meta">Image failed to load</div>
         }
 
-        <div class="meta">Published: {{ item.published }}</div>
+        <div class="meta">Published: {{ item.published | date: 'MMM d, y, HH:mm' }}</div>
 
         @if (isLostAnimalPost(item)) {
           @if (isFound(item)) {
@@ -130,7 +130,9 @@
                       <span class="comment-user">
                         {{ comment.displayUser || comment.userId }}
                       </span>
-                      <span class="comment-time">{{ comment.time }}</span>
+                      <span class="comment-time">
+                        {{ comment.time | date: 'MMM d, y, HH:mm' }}
+                      </span>
                     </div>
 
                     <div class="comment-body">{{ comment.comment }}</div>

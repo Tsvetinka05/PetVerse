@@ -51,10 +51,11 @@
         <div class="post-meta">
           <p><strong>Type:</strong> {{ p.type }}</p>
           <p><strong>Status:</strong> {{ p.status }}</p>
-          <p class="meta">Published: {{ p.published }}</p>
-
+          <p class="meta">Published: {{ p.published | date: 'MMM d, y, HH:mm' }}</p>
           @if (p.adoptedAt) {
-            <p class="meta"><strong>Adopted at:</strong> {{ p.adoptedAt }}</p>
+            <p class="meta">
+              <strong>Adopted at:</strong> {{ p.adoptedAt | date: 'MMM d, y, HH:mm' }}
+            </p>
           }
         </div>
 

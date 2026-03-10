@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 
 import { FeedService, FeedPostDto } from '../../services/feed.service';
 import { UserPostsService } from '../../services/user-posts.service';
@@ -45,7 +46,7 @@ interface FeedCardVm {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
